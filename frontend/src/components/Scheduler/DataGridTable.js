@@ -18,7 +18,6 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
 
 const generateColumns = (data) => {
     if (data.length === 0) return [];
-
     const keys = Object.keys(data[0]);
     return keys.map((key) => ({
         field: key,
@@ -37,11 +36,12 @@ const generateColumns = (data) => {
     }));
 };
 
-const DataGridTable = ({ rows }) => {
+const DataGridTable = ({ rows = [] }) => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-    const columns = generateColumns(rows);
+    const columns = useMemo(() => generateColumns(rows), [rows]);
 
-    const totalPages = Math.ceil(rows.length / paginationModel.pageSize);
+    const totalRows = rows.length;
+    const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
 
     const paginatedRows = useMemo(() => {
         const startIdx = paginationModel.page * paginationModel.pageSize;
@@ -57,7 +57,7 @@ const DataGridTable = ({ rows }) => {
         setPaginationModel((prev) => ({
             ...prev,
             pageSize: parseInt(event.target.value, 10),
-            page: 0,
+            page: 0, // Resetujemy stronę na 0 przy zmianie liczby rekordów
         }));
     };
 
@@ -72,37 +72,38 @@ const DataGridTable = ({ rows }) => {
             >
                 {rows.length === 0 ? (
                     <Typography variant="h6" color="textSecondary" align="center" mt={3}>
-                        No records
+                        Brak rekordów
                     </Typography>
                 ) : (
                     <StyledDataGrid
                         rows={paginatedRows}
                         columns={columns}
-                        pagination={false}
+                        pageSize={paginationModel.pageSize}
+                        pagination
+                        page={paginationModel.page}
+                        onPageChange={handlePageChange}
+                        rowsPerPageOptions={[5, 10, 25, 50]}
                         disableColumnMenu
                         autoHeight
                         hideFooterSelectedRowCount
-                        sx={{
-                            '& .MuiTablePagination-root': {
-                                display: 'none',
-                            },
-                        }}
                     />
                 )}
             </motion.div>
+
             {rows.length > 0 && (
                 <Box display="flex" justifyContent="flex-end" mt={2}>
                     <TablePagination
                         component="div"
-                        count={rows.length}
+                        count={totalRows}
                         page={paginationModel.page}
                         onPageChange={handlePageChange}
                         rowsPerPage={paginationModel.pageSize}
                         onRowsPerPageChange={handlePageSizeChange}
                         rowsPerPageOptions={[5, 10, 25, 50]}
-                        labelRowsPerPage="Rows per page"
+                        labelRowsPerPage="Rekordów na stronę"
                         showFirstButton
                         showLastButton
+                        pageCount={totalPages}
                     />
                 </Box>
             )}

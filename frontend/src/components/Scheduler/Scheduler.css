@@ -1,31 +1,32 @@
-.scheduler {
-    position: relative;
-    padding-top: 64px;
+html, body {
+    overflow: hidden;
 }
 
 .scheduler-container {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     min-height: 100vh;
+    flex-direction: column;
+    padding: 0 20px;
+    overflow: hidden;
 }
 
 .content-container {
-    margin-top: 64px;
+    width: 100%;
+    padding: 30px;
+    box-sizing: border-box;
+    margin-top: 20px;
+    height: calc(100vh - 90px);
+    transition: transform 0.3s ease-in-out;
 }
 
-.generate-btn-container {
-    margin-top: 16px;
-}
-
-.MuiTableCell-root {
-    font-size: 14px;
-    font-family: Arial, sans-serif;
-    border-right: 1px solid #ddd;
-}
-
-.MuiTableHead-root {
-    background-color: #f1f1f1;
+.scheduler-table-container {
+    width: 100%;
+    min-width: 1200px;
+    overflow-x: auto;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 .MuiBox-root {
@@ -40,27 +41,21 @@
     font-size: 12px;
 }
 
-.scheduler-table-container {
-    width: 100%;
-    min-width: 1200px;
-    overflow-x: auto;
-    margin: 0 auto;
+.inline-buttons {
+    display: inline;
 }
 
-.scheduler-table-container .MuiTableContainer-root {
-    width: 100%;
+.MuiTableCell-root {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    border-right: 1px solid #ddd;
 }
 
-.content-container {
-    transform: scale(1.1) rotate(10deg);
-    transition: transform 0.3s ease-in-out;
+.MuiTableHead-root {
+    background-color: #f1f1f1;
 }
 
 .MuiBox-root.css-0 {
     transform: translateX(20px);
     transition: transform 0.3s ease-in-out;
-}
-
-.inline-buttons {
-    display: inline;
 }
