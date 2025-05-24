@@ -18,6 +18,7 @@ use App\Scheduler\Domain\Mapper\ShiftMapper;
 final readonly class ScheduleGenerate
 {
     private const MAX_WORK_HOURS_PER_DAY = 8;
+    private const MAX_AGENTS_PER_PREDICTION = 3;
 
     public function __construct(
         private EfficiencyRepository $efficiencyRepository,
@@ -38,8 +39,6 @@ final readonly class ScheduleGenerate
     }
 
     /**
-     * @param EfficiencyListContract $efficiencyList
-     * @param PredictionListContract $predictionList
      * @return list<ShiftCreateContract>
      */
     private function createSchedule(
@@ -48,17 +47,26 @@ final readonly class ScheduleGenerate
     ): array {
         $schedule = [];
         $agentDailyWorkHours = [];
+        $assignedAgents = [];
 
         foreach ($predictionList->getItems() as $prediction) {
             $agents = $this->findBestAgentsPrediction($efficiencyList, $prediction);
             foreach ($agents as $agent) {
-                $agentId = (string) $agent->getId();
-                $currentDailyHours = $agentDailyWorkHours[$agentId] ?? 0;
+                $agentId = (string)$agent->getId();
+                $currentDailyHours = $agentDailyWorkHours[$agentId][$prediction->getDate()->format('Y-m-d')] ?? 0;
 
                 if ($currentDailyHours + 1 <= self::MAX_WORK_HOURS_PER_DAY) {
-                    $shiftCreate = $this->shiftMapper::mapEntityToCreateContract($agent, $prediction);
-                    $schedule[] = $shiftCreate;
-                    $agentDailyWorkHours[$agentId] = $currentDailyHours + 1;
+                    $assignedAgentsForPrediction = $assignedAgents[(string)$prediction->getId()] ?? 0;
+
+                    if ($assignedAgentsForPrediction < self::MAX_AGENTS_PER_PREDICTION) {
+                        $shiftCreate = $this->shiftMapper::mapEntityToCreateContract($agent, $prediction);
+                        $schedule[] = $shiftCreate;
+
+                        $assignedAgents[(string)$prediction->getId()] = $assignedAgentsForPrediction + 1;
+                        $agentDailyWorkHours[$agentId][$prediction->getDate()->format(
+                            'Y-m-d'
+                        )] = $currentDailyHours + 1;
+                    }
                 }
             }
         }
@@ -95,7 +103,6 @@ final readonly class ScheduleGenerate
 
     /**
      * @param list<ShiftCreateContract> $schedule
-     * @return void
      */
     private function saveSchedule(array $schedule): void
     {

@@ -59,64 +59,10 @@ class AppFixtures extends Fixture
         $manager->flush();
 
         $endDate = new \DateTime();
-        $startDate = (clone $endDate)->modify('-1 month');
-        $dateInterval = new \DateInterval('P1D');
-        $period = new \DatePeriod($startDate, $dateInterval, $endDate);
-
-        foreach ($period as $date) {
-            if (in_array($date->format('N'), [6, 7])) {
-                continue;
-            }
-
-            foreach ($agents as $agentData) {
-                $agent = $manager->getRepository(Agent::class)->findOneBy(['name' => $agentData['name']]);
-                if (!$agent) {
-                    echo 'Agent not found: ' . $agentData['name'] . PHP_EOL;
-                    continue;
-                }
-
-                $queueName = $agentData['queues'][array_rand($agentData['queues'])];
-                $queue = $manager->getRepository(Queue::class)->findOneBy(['name' => $queueName]);
-                if (!$queue) {
-                    echo 'Queue not found: ' . $queueName . PHP_EOL;
-                    continue;
-                }
-
-                $startHour = random_int(7, 20);
-                $shiftStart = (clone $date)->setTime($startHour, 0, 0);
-                $shiftDuration = random_int(4, 12);
-
-                for ($i = 0; $i < $shiftDuration; $i++) {
-                    $shiftEnd = (clone $shiftStart)->modify('+1 hour');
-
-                    $shift = new Shift();
-                    $shift->setId(Uuid::v4());
-                    $shift->setAgent($agent);
-                    $shift->setStart($shiftStart);
-                    $shift->setEnd($shiftEnd);
-                    $shift->setQueue($queue);
-
-                    $manager->persist($shift);
-                    $shiftStart = $shiftEnd;
-                }
-
-                $midShift = (clone $shiftStart)->modify('+2 hours');
-                $callHistory = new CallHistory();
-                $callHistory->setId(Uuid::v4());
-                $callHistory->setAgent($agent);
-                $callHistory->setQueue($queue);
-                $callHistory->setDate($midShift);
-                $callHistory->setCallsCount(random_int(20, 80));
-
-                $manager->persist($callHistory);
-            }
-        }
-
-        $manager->flush();
-
-        $threeMonthsLater = (clone $endDate)->modify('+3 months');
-        $predictionInterval = new \DateInterval('P1D');
-        $predictionPeriod = new \DatePeriod($startDate, $predictionInterval, $threeMonthsLater);
+        $startDate = (clone $endDate)->modify('+1 day');
+        $oneMonthLater = (clone $startDate)->modify('+1 month');
+        $predictionInterval = new \DateInterval('PT1H');
+        $predictionPeriod = new \DatePeriod($startDate, $predictionInterval, $oneMonthLater);
 
         foreach ($predictionPeriod as $date) {
             if (in_array($date->format('N'), [6, 7])) {
@@ -127,7 +73,18 @@ class AppFixtures extends Fixture
                 $queue = $manager->getRepository(Queue::class)->findOneBy(['name' => $queueName]);
 
                 if ($queue) {
-                    $time = (clone $date)->setTime(random_int(7, 20), 0);
+                    if ($date->format('H') >= 10 && $date->format('H') < 18) {
+                        $time = (clone $date)->setTime((int) $date->format('H'), 0);
+                    } elseif ($date->format('H') >= 7 && $date->format('H') < 10) {
+                        $randomHour = random_int(7, 9);
+                        $time = (clone $date)->setTime($randomHour, 0);
+                    } elseif ($date->format('H') >= 18 && $date->format('H') < 20) {
+                        $randomHour = random_int(18, 19);
+                        $time = (clone $date)->setTime($randomHour, 0);
+                    } else {
+                        continue;
+                    }
+
                     $occupancy = random_int(5, 20);
 
                     $prediction = new Prediction(

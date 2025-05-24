@@ -108,18 +108,6 @@ const Scheduler = () => {
             <TabsComponent selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabData={tabData} />
             <Container maxWidth="lg" className="scheduler-container">
                 <MainContent>
-                    <Box className="content-container">
-                        <motion.div
-                            key={selectedTab}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            transition={{ duration: 0.5, ease: 'easeInOut' }}
-                        >
-                            {renderTabContent()}
-                        </motion.div>
-                    </Box>
-
                     {selectedTab === 5 && (
                         <Box display="flex" justifyContent="center" className="generate-btn-container">
                             <GenerateButton
@@ -131,6 +119,17 @@ const Scheduler = () => {
                             </GenerateButton>
                         </Box>
                     )}
+                    <Box className="content-container">
+                        <motion.div
+                            key={selectedTab}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{ duration: 0.5, ease: 'easeInOut' }}
+                        >
+                            {renderTabContent()}
+                        </motion.div>
+                    </Box>
                 </MainContent>
             </Container>
 

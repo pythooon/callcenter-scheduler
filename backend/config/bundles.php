@@ -1,12 +1,5 @@
 <?php
 
-use Doctrine\DBAL\Types\Type;
-use App\Common\Type\UuidType;
-
-if (!Type::hasType(UuidType::NAME)) {
-    Type::addType(UuidType::NAME, UuidType::class);
-}
-
 return [
     Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
     Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
