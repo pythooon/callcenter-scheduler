@@ -9,7 +9,7 @@ html, body {
     min-height: 100vh;
     flex-direction: column;
     padding: 0 20px;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .content-container {
@@ -58,4 +58,13 @@ html, body {
 .MuiBox-root.css-0 {
     transform: translateX(20px);
     transition: transform 0.3s ease-in-out;
+}
+
+.MuiDataGrid-mainContent .MuiTablePagination-root {
+    display: none;
+}
+
+.MuiDataGrid-root {
+    max-height: 800px;
+    overflow: auto;
 }

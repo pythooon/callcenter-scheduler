@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { Box, TablePagination, styled, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
@@ -43,11 +43,15 @@ const DataGridTable = ({ rows = [] }) => {
     const totalRows = rows.length;
     const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
 
-    const paginatedRows = useMemo(() => {
-        const startIdx = paginationModel.page * paginationModel.pageSize;
-        const endIdx = startIdx + paginationModel.pageSize;
-        return rows.slice(startIdx, endIdx);
-    }, [rows, paginationModel.page, paginationModel.pageSize]);
+    const startIdx = paginationModel.page * paginationModel.pageSize;
+    const endIdx = startIdx + paginationModel.pageSize;
+    const paginatedRows = rows.slice(startIdx, endIdx);
+
+    useEffect(() => {
+        if (paginationModel.page >= totalPages) {
+            setPaginationModel((prev) => ({ ...prev, page: 0 }));
+        }
+    }, [totalRows, paginationModel.pageSize]);
 
     const handlePageChange = (event, newPage) => {
         setPaginationModel((prev) => ({ ...prev, page: newPage }));
@@ -57,7 +61,7 @@ const DataGridTable = ({ rows = [] }) => {
         setPaginationModel((prev) => ({
             ...prev,
             pageSize: parseInt(event.target.value, 10),
-            page: 0, // Resetujemy stronę na 0 przy zmianie liczby rekordów
+            page: 0,
         }));
     };
 
@@ -70,9 +74,9 @@ const DataGridTable = ({ rows = [] }) => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
-                {rows.length === 0 ? (
+                {totalRows === 0 ? (
                     <Typography variant="h6" color="textSecondary" align="center" mt={3}>
-                        Brak rekordów
+                        No records
                     </Typography>
                 ) : (
                     <StyledDataGrid
@@ -86,11 +90,16 @@ const DataGridTable = ({ rows = [] }) => {
                         disableColumnMenu
                         autoHeight
                         hideFooterSelectedRowCount
+                        sx={{
+                            '& .MuiDataGrid-virtualScroller': {
+                                overflow: 'auto !important',
+                            },
+                        }}s
                     />
                 )}
             </motion.div>
 
-            {rows.length > 0 && (
+            {totalRows > 0 && (
                 <Box display="flex" justifyContent="flex-end" mt={2}>
                     <TablePagination
                         component="div"
@@ -100,7 +109,7 @@ const DataGridTable = ({ rows = [] }) => {
                         rowsPerPage={paginationModel.pageSize}
                         onRowsPerPageChange={handlePageSizeChange}
                         rowsPerPageOptions={[5, 10, 25, 50]}
-                        labelRowsPerPage="Rekordów na stronę"
+                        labelRowsPerPage="Records per page"
                         showFirstButton
                         showLastButton
                         pageCount={totalPages}

@@ -22,8 +22,6 @@ const Scheduler = () => {
     const [errorMessage, setErrorMessage] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [page, setPage] = useState(0);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -78,16 +76,10 @@ const Scheduler = () => {
         }
 
         const selectedData = data[tabData[selectedTab]?.key];
-        const paginatedData = selectedData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
         return (
             <DataGridTable
-                rows={paginatedData}
-                page={page}
-                rowsPerPage={rowsPerPage}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                totalRows={selectedData.length}
+                rows={selectedData}
             />
         );
     };
