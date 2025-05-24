@@ -1,0 +1,31 @@
+controllers:
+    resource: '../src/*/Infrastructure/Controller'
+    type: attribute
+api_scheduler_calculate_efficiency:
+    path: /api/scheduler/calculate-efficiency
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::calculateEfficiency
+    methods: [POST]
+scheduler_generate:
+    path: /api/scheduler/generate
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::scheduleGenerate
+    methods: [POST]
+scheduler_agents:
+    path: /api/scheduler/agents
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::agents
+    methods: [GET]
+scheduler_efficiencies:
+    path: /api/scheduler/efficiencies
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::efficiencies
+    methods: [GET]
+scheduler_queues:
+    path: /api/scheduler/queues
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::queues
+    methods: [GET]
+scheduler_predictions:
+    path: /api/scheduler/predictions
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::predictions
+    methods: [GET]
+scheduler_shifts:
+    path: /api/scheduler/shifts
+    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::shifts
+    methods: [GET]

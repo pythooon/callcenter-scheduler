@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  php:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/var/www/api
+    environment:
+      WAIT_FOR_DB: "true"
+      RUN_MIGRATIONS: "true"
+      LOAD_FIXTURES: "true"
+      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}"
+    entrypoint: [ "/var/www/api/entrypoint.sh" ]
+    command: [ "php-fpm" ]
+    depends_on:
+      - mysql
+    networks:
+      - scheduler
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./backend:/var/www/api
+      - ./frontend/build:/var/www/app
+      - ./backend/nginx/api.conf:/etc/nginx/conf.d/api.conf
+      - ./backend/nginx/frontend.conf:/etc/nginx/conf.d/frontend.conf
+      - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./backend/nginx/.htpasswd:/etc/nginx/.htpasswd
+    depends_on:
+      - php
+      - frontend
+    networks:
+      - scheduler
+
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./backend/db_data:/var/lib/mysql
+      - ./backend/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - scheduler
+
+  frontend:
+    build:
+      context: ./frontend
+    volumes:
+      - ./frontend:/var/www/app
+    ports:
+      - "3000:3000"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    command: npm start
+    networks:
+      - scheduler
+
+  dozzle:
+    image: amir20/dozzle:latest
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - "8080:8080"
+    environment:
+      DOZZLE_LEVEL: trace
+    networks:
+      - scheduler
+
+networks:
+  scheduler:
+    driver: bridge

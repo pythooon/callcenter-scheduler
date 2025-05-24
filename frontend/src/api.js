@@ -1,0 +1,45 @@
+const API_URL = 'http://api.scheduler';
+
+export const fetchAgents = async () => {
+    const response = await fetch(`${API_URL}/api/scheduler/agents`);
+    return await response.json();
+};
+
+export const fetchEfficiencies = async () => {
+    const response = await fetch(`${API_URL}/api/scheduler/efficiencies`);
+    return await response.json();
+};
+
+export const fetchQueues = async () => {
+    const response = await fetch(`${API_URL}/api/scheduler/queues`);
+    return await response.json();
+};
+
+export const fetchPredictions = async () => {
+    const response = await fetch(`${API_URL}/api/scheduler/predictions`);
+    return await response.json();
+};
+
+export const fetchShifts = async () => {
+    const response = await fetch(`${API_URL}/api/scheduler/shifts`);
+    return await response.json();
+};
+
+export const generateSchedule = async () => {
+    try {
+        const response = await fetch(`${API_URL}/api/scheduler/generate`, {method: 'POST'});
+        return response.status === 204;
+    } catch (error) {
+        throw new Error('Error generate schedule');
+    }
+};
+
+export const calculateEfficiency = async () => {
+    try {
+        const response = await fetch(`${API_URL}/api/scheduler/calculate-efficiency`, {method: 'POST'});
+        return response.data;
+    } catch (error) {
+        throw new Error('Error calculating efficiency');
+    }
+};
+

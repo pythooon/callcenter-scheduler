@@ -1,0 +1,64 @@
+.scheduler {
+    position: relative;
+    padding-top: 64px;
+}
+
+.scheduler-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.content-container {
+    margin-top: 64px;
+}
+
+.generate-btn-container {
+    margin-top: 16px;
+}
+
+.MuiTableCell-root {
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+}
+
+.MuiTableHead-root {
+    background-color: #f1f1f1;
+}
+
+.MuiTableCell-root {
+    border-right: 1px solid #ddd;
+}
+
+.MuiBox-root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.MuiTypography-body2 {
+    font-size: 12px;
+}
+
+.scheduler-table-container {
+    width: 100%;
+    min-width: 1200px;
+    overflow-x: auto;
+    margin: 0 auto;
+}
+
+.scheduler-table-container .MuiTableContainer-root {
+    width: 100%;
+}
+
+.content-container {
+    transform: scale(1.1) rotate(10deg);
+    transition: transform 0.3s ease-in-out;
+}
+
+.MuiBox-root.css-0 {
+    transform: translateX(20px);
+    transition: transform 0.3s ease-in-out;
+}
