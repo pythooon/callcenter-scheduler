@@ -50,8 +50,8 @@ final readonly class PredictionRead implements PredictionReadContract
         return [
             'id' => $this->id,
             'queue' => $this->queue->toArray(),
-            'date' => $this->date,
-            'time' => $this->time,
+            'date' => $this->date->format('Y-m-d'),
+            'time' => $this->time->format('H:i'),
             'occupancy' => $this->occupancy,
         ];
     }

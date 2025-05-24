@@ -1,5 +1,5 @@
 import React from 'react';
-import { Tabs, Tab } from '@mui/material';
+import { Tabs } from '@mui/material';
 import { TabButton } from './StyledComponents';
 
 const TabsComponent = ({ selectedTab, setSelectedTab, tabData }) => {

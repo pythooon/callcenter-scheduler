@@ -1,4 +1,4 @@
-import { Button, Box, Typography, Tab } from '@mui/material';
+import { Button, Box, Tab } from '@mui/material';
 import { styled } from '@mui/system';
 
 export const GenerateButton = styled(Button)({

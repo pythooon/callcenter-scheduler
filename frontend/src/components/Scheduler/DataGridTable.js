@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { styled } from '@mui/system';
+import { Box, TablePagination, styled } from '@mui/material';
 import './DataGridTable.css';
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -22,21 +22,25 @@ const generateColumns = (data) => {
     return keys.map((key) => ({
         field: key,
         headerName: key.charAt(0).toUpperCase() + key.slice(1),
-        width: 250,
+        width: 200,
         sortable: true,
+        filterable: true,
+        hide: key === 'id',
         renderCell: (params) => {
-            return typeof params.value === 'object' ? params.value.name : params.value;
-        }
+            const value = params.value;
+            if (value && typeof value === 'object') {
+                return value.name || value.city || value.score || JSON.stringify(value);
+            }
+            return value;
+        },
     }));
 };
 
 const DataGridTable = ({ rows }) => {
-    const [paginationModel, setPaginationModel] = useState({
-        page: 0,
-        pageSize: 10,
-    });
-
+    const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
     const columns = generateColumns(rows);
+
+    const totalPages = Math.ceil(rows.length / paginationModel.pageSize);
 
     const paginatedRows = useMemo(() => {
         const startIdx = paginationModel.page * paginationModel.pageSize;
@@ -44,19 +48,48 @@ const DataGridTable = ({ rows }) => {
         return rows.slice(startIdx, endIdx);
     }, [rows, paginationModel.page, paginationModel.pageSize]);
 
+    const handlePageChange = (event, newPage) => {
+        setPaginationModel((prev) => ({ ...prev, page: newPage }));
+    };
+
+    const handlePageSizeChange = (event) => {
+        setPaginationModel((prev) => ({
+            ...prev,
+            pageSize: parseInt(event.target.value, 10),
+            page: 0,
+        }));
+    };
+
     return (
-        <div className="data-grid-container">
+        <Box>
             <StyledDataGrid
                 rows={paginatedRows}
                 columns={columns}
-                pageSize={paginationModel.pageSize}
-                paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
-                pagination
+                pagination={false}
                 disableColumnMenu
                 autoHeight
+                hideFooterSelectedRowCount
+                sx={{
+                    '& .MuiTablePagination-root': {
+                        display: 'none',
+                    },
+                }}
             />
-        </div>
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+                <TablePagination
+                    component="div"
+                    count={rows.length}
+                    page={paginationModel.page}
+                    onPageChange={handlePageChange}
+                    rowsPerPage={paginationModel.pageSize}
+                    onRowsPerPageChange={handlePageSizeChange}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    labelRowsPerPage="Wierszy na stronę"
+                    showFirstButton
+                    showLastButton
+                />
+            </Box>
+        </Box>
     );
 };
 
