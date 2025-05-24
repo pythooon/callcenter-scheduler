@@ -16,8 +16,7 @@ html, body {
     width: 100%;
     padding: 30px;
     box-sizing: border-box;
-    margin-top: 20px;
-    height: calc(100vh - 90px);
+    height: calc(90vh - 90px);
     transition: transform 0.3s ease-in-out;
 }
 

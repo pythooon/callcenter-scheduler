@@ -149,7 +149,7 @@ const SchedulerTable = () => {
         <Box sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <Typography variant="h6" sx={{ textAlign: 'center', marginX: '10px' }}>
-                    {format(currentDate, 'MMMM dd, yyyy')} - {format(addDays(currentDate, 6), 'MMMM dd, yyyy')}
+                    {format(subDays(currentDate, 6), 'MMMM dd, yyyy')} - {format(currentDate, 'MMMM dd, yyyy')}
                 </Typography>
                 <Box className="inline-buttons">
                     <IconButton onClick={handlePrevWeek}>
@@ -166,7 +166,7 @@ const SchedulerTable = () => {
                     Loading...
                 </Typography>
             ) : (
-                <TableContainer sx={{ maxHeight: '80vh', overflowY: 'auto' }}>
+                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto' }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
