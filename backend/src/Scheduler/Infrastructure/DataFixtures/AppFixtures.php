@@ -34,7 +34,7 @@ class AppFixtures extends Fixture
         $agents = [
             ['name' => 'John Doe', 'queues' => ['Sales', 'Complaints', 'Technical Support']],
             ['name' => 'Jane Smith', 'queues' => ['Technical Support', 'Complaints']],
-            ['name' => 'Paul Jones', 'queues' => ['Technical Support','Complaints']],
+            ['name' => 'Paul Jones', 'queues' => ['Technical Support', 'Complaints']],
             ['name' => 'Ed Harris', 'queues' => ['Technical Support', 'Complaints']],
             ['name' => 'Alice Johnson', 'queues' => ['Sales', 'Technical Support']],
             ['name' => 'Bob Taylor', 'queues' => ['Sales', 'Complaints']],
@@ -58,8 +58,8 @@ class AppFixtures extends Fixture
         }
         $manager->flush();
 
-        $startDate = new \DateTime('2025-02-01');
-        $endDate = new \DateTime('2025-05-23');
+        $startDate = new \DateTime('2025-04-01');
+        $endDate = new \DateTime('2025-06-01');
         $dateInterval = new \DateInterval('P1D');
         $period = new \DatePeriod($startDate, $dateInterval, $endDate);
 
@@ -81,10 +81,10 @@ class AppFixtures extends Fixture
                     continue;
                 }
 
-                if (random_int(0, 100) < 60) {
+                if (random_int(0, 100) < 80) {
                     $startHour = random_int(7, 18);
                     $shiftStart = (clone $date)->setTime($startHour, 0, 0);
-                    $shiftDuration = random_int(2, 10);
+                    $shiftDuration = random_int(4, 12);
 
                     for ($i = 0; $i < $shiftDuration; $i++) {
                         $shiftEnd = (clone $shiftStart)->modify('+1 hour');
@@ -106,7 +106,7 @@ class AppFixtures extends Fixture
                     $callHistory->setAgent($agent);
                     $callHistory->setQueue($queue);
                     $callHistory->setDate($midShift);
-                    $callHistory->setCallsCount(random_int(10, 60));
+                    $callHistory->setCallsCount(random_int(20, 80));
 
                     $manager->persist($callHistory);
                 }
@@ -115,7 +115,7 @@ class AppFixtures extends Fixture
 
         $manager->flush();
 
-        $threeMonthsLater = new \DateTime('2025-08-01');
+        $threeMonthsLater = new \DateTime('2025-07-01');
         $predictionInterval = new \DateInterval('P1D');
         $predictionPeriod = new \DatePeriod($startDate, $predictionInterval, $threeMonthsLater);
 
@@ -129,7 +129,7 @@ class AppFixtures extends Fixture
 
                 if ($queue) {
                     $time = (clone $date)->setTime(random_int(7, 18), 0);
-                    $occupancy = random_int(5, 15);
+                    $occupancy = random_int(5, 20);
 
                     $prediction = new Prediction(
                         id: Uuid::v4(),
