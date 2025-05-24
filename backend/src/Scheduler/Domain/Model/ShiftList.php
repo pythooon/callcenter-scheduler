@@ -15,7 +15,7 @@ final class ShiftList implements ShiftListContract
     /**
      * @var list<ShiftReadContract>
      */
-    private array $items;
+    private array $items = [];
 
     public function addItem(ShiftReadContract $contract): void
     {

@@ -24,7 +24,7 @@ interface EfficiencyReadContract extends Arrayable
      *         id: string,
      *         name: string
      *     },
-     *     agent: array{
+     *     queue: array{
      *         id: string,
      *         name: string
      *     },

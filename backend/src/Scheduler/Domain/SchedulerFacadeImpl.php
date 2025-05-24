@@ -17,6 +17,7 @@ use App\Scheduler\Domain\UseCase\Predictions\Predictions;
 use App\Scheduler\Domain\UseCase\Queues\Queues;
 use App\Scheduler\Domain\UseCase\ScheduleGenerate\ScheduleGenerate;
 use App\Scheduler\Domain\UseCase\Shifts\Shifts;
+use DateTimeInterface;
 
 final readonly class SchedulerFacadeImpl implements SchedulerFacade
 {
@@ -61,8 +62,8 @@ final readonly class SchedulerFacadeImpl implements SchedulerFacade
         return $this->predictions->run();
     }
 
-    public function shifts(): ShiftListContract
+    public function shifts(?DateTimeInterface $start, ?DateTimeInterface $end): ShiftListContract
     {
-        return $this->shifts->run();
+        return $this->shifts->run($start, $end);
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, TablePagination, styled } from '@mui/material';
+import { Box, TablePagination, styled, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
 import './DataGridTable.css';
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
@@ -61,34 +62,50 @@ const DataGridTable = ({ rows }) => {
     };
 
     return (
-        <Box>
-            <StyledDataGrid
-                rows={paginatedRows}
-                columns={columns}
-                pagination={false}
-                disableColumnMenu
-                autoHeight
-                hideFooterSelectedRowCount
-                sx={{
-                    '& .MuiTablePagination-root': {
-                        display: 'none',
-                    },
-                }}
-            />
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-                <TablePagination
-                    component="div"
-                    count={rows.length}
-                    page={paginationModel.page}
-                    onPageChange={handlePageChange}
-                    rowsPerPage={paginationModel.pageSize}
-                    onRowsPerPageChange={handlePageSizeChange}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
-                    labelRowsPerPage="Wierszy na stronę"
-                    showFirstButton
-                    showLastButton
-                />
-            </Box>
+        <Box sx={{ maxWidth: '1200px', margin: 'auto' }}>
+            <motion.div
+                key="data-grid"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.5, ease: 'easeInOut' }}
+            >
+                {rows.length === 0 ? (
+                    <Typography variant="h6" color="textSecondary" align="center" mt={3}>
+                        No records
+                    </Typography>
+                ) : (
+                    <StyledDataGrid
+                        rows={paginatedRows}
+                        columns={columns}
+                        pagination={false}
+                        disableColumnMenu
+                        autoHeight
+                        hideFooterSelectedRowCount
+                        sx={{
+                            '& .MuiTablePagination-root': {
+                                display: 'none',
+                            },
+                        }}
+                    />
+                )}
+            </motion.div>
+            {rows.length > 0 && (
+                <Box display="flex" justifyContent="flex-end" mt={2}>
+                    <TablePagination
+                        component="div"
+                        count={rows.length}
+                        page={paginationModel.page}
+                        onPageChange={handlePageChange}
+                        rowsPerPage={paginationModel.pageSize}
+                        onRowsPerPageChange={handlePageSizeChange}
+                        rowsPerPageOptions={[5, 10, 25, 50]}
+                        labelRowsPerPage="Rows per page"
+                        showFirstButton
+                        showLastButton
+                    />
+                </Box>
+            )}
         </Box>
     );
 };

@@ -9,6 +9,7 @@ use App\Scheduler\Application\Contract\ShiftListContract;
 use App\Scheduler\Application\Repository\ShiftEntityRepository;
 use App\Scheduler\Application\Repository\ShiftRepository;
 use App\Scheduler\Domain\Mapper\ShiftMapper;
+use DateTimeInterface;
 
 final readonly class ShiftRepositoryImpl implements ShiftRepository
 {
@@ -16,9 +17,9 @@ final readonly class ShiftRepositoryImpl implements ShiftRepository
     {
     }
 
-    public function findAll(): ShiftListContract
+    public function findShiftsBetweenDates(?DateTimeInterface $start, ?DateTimeInterface $end): ShiftListContract
     {
-        return $this->mapper::mapArrayToListContract($this->entityRepository->findAll());
+        return $this->mapper::mapArrayToListContract($this->entityRepository->findShiftsBetweenDates($start, $end));
     }
 
     public function upsert(ShiftCreateContract $contract): void

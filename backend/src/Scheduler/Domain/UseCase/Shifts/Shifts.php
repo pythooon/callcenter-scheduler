@@ -6,6 +6,8 @@ namespace App\Scheduler\Domain\UseCase\Shifts;
 
 use App\Scheduler\Application\Contract\ShiftListContract;
 use App\Scheduler\Application\Repository\ShiftRepository;
+use DateTime;
+use DateTimeInterface;
 
 final readonly class Shifts
 {
@@ -13,8 +15,8 @@ final readonly class Shifts
     {
     }
 
-    public function run(): ShiftListContract
+    public function run(?DateTimeInterface $start, ?DateTimeInterface $end): ShiftListContract
     {
-        return $this->repository->findAll();
+        return $this->repository->findShiftsBetweenDates($start, $end);
     }
 }

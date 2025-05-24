@@ -46,7 +46,7 @@ final readonly class EfficiencyRead implements EfficiencyReadContract
      *         id: string,
      *         name: string
      *     },
-     *     agent: array{
+     *     queue: array{
      *         id: string,
      *         name: string
      *     },

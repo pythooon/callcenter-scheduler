@@ -9,6 +9,7 @@ use App\Scheduler\Application\Contract\EfficiencyListContract;
 use App\Scheduler\Application\Contract\PredictionListContract;
 use App\Scheduler\Application\Contract\QueueListContract;
 use App\Scheduler\Application\Contract\ShiftListContract;
+use DateTime;
 
 interface SchedulerFacade
 {
@@ -24,5 +25,5 @@ interface SchedulerFacade
 
     public function predictions(): PredictionListContract;
 
-    public function shifts(): ShiftListContract;
+    public function shifts(?DateTime $start, ?DateTime $end): ShiftListContract;
 }

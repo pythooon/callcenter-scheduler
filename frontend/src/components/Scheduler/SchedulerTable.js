@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from '@mui/material';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton } from '@mui/material';
 import { styled } from '@mui/system';
-import { format, addDays, startOfWeek } from 'date-fns';
+import { format, addDays, startOfWeek, subDays } from 'date-fns';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { fetchShifts } from '../../api';
 
 const StyledTableCell = styled(TableCell)({
     padding: '12px',
@@ -27,31 +30,62 @@ const StyledTableRow = styled(TableRow)({
     },
 });
 
-const getNextWeekDates = () => {
-    const today = new Date();
-    const startOfNextWeek = startOfWeek(addDays(today, 7), { weekStartsOn: 1 });
-    const weekDates = [];
-
-    for (let i = 0; i < 7; i++) {
-        const day = addDays(startOfNextWeek, i);
-        weekDates.push(format(day, 'yyyy-MM-dd'));
-    }
-
-    return weekDates;
-};
-
-const SchedulerTable = ({ scheduleData }) => {
-    const [tooltipInfo, setTooltipInfo] = useState(null);
-    const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+const SchedulerTable = () => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+    const [scheduleData, setScheduleData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    const weekDates = getNextWeekDates();
     const hoursOfDay = Array.from({ length: 24 }, (_, i) => `${i}:00`);
+
+    const getWeekDates = useMemo(() => {
+        const startOfCurrentWeek = startOfWeek(currentDate, { weekStartsOn: 1 });
+        const weekDates = [];
+        for (let i = 0; i < 7; i++) {
+            const day = addDays(startOfCurrentWeek, i);
+            weekDates.push(format(day, 'yyyy-MM-dd'));
+        }
+        return weekDates;
+    }, [currentDate]);
+
+    const fetchScheduleData = async (startDate, endDate) => {
+        setIsLoading(true);
+        try {
+            const data = await fetchShifts(startDate, endDate);
+            setScheduleData(data);
+        } catch (error) {
+            console.error('Error fetching schedule data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePrevWeek = () => {
+        const newDate = subDays(currentDate, 7);
+        setCurrentDate(newDate);
+        const startOfWeekDate = format(startOfWeek(newDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        const endOfWeekDate = format(addDays(startOfWeek(newDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
+        fetchScheduleData(startOfWeekDate, endOfWeekDate);
+    };
+
+    const handleNextWeek = () => {
+        const newDate = addDays(currentDate, 7);
+        setCurrentDate(newDate);
+        const startOfWeekDate = format(startOfWeek(newDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        const endOfWeekDate = format(addDays(startOfWeek(newDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
+        fetchScheduleData(startOfWeekDate, endOfWeekDate);
+    };
+
+    useEffect(() => {
+        const startOfWeekDate = format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+        const endOfWeekDate = format(addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
+        fetchScheduleData(startOfWeekDate, endOfWeekDate);
+    }, [currentDate]);
 
     const getRowContent = (dayIndex, hour, weekDate) => {
         if (!weekDate) return null;
 
-        const task = scheduleData.find((shift) => {
+        const tasksForThisHour = scheduleData.filter((shift) => {
             const taskStart = new Date(shift.start);
             const taskEnd = new Date(shift.end);
             const currentDay = new Date(weekDate);
@@ -61,88 +95,75 @@ const SchedulerTable = ({ scheduleData }) => {
             return taskStart < currentHourEnd && taskEnd > currentHourStart;
         });
 
-        if (task) {
-            return (
+        if (tasksForThisHour.length > 0) {
+            return tasksForThisHour.map((task, index) => (
                 <Box
+                    key={index}
                     sx={{
                         backgroundColor: '#c5e1a5',
                         padding: '6px',
                         borderRadius: '4px',
                         cursor: 'pointer',
                         boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                        position: 'relative',
                     }}
-                    onMouseEnter={(e) => handleMouseEnter(e, task)}
-                    onMouseLeave={handleMouseLeave}
                 >
                     <Typography variant="body2" color="textPrimary">{task.agent.name}</Typography>
                     <Typography variant="body2" color="textSecondary">{task.queue.name}</Typography>
                 </Box>
-            );
+            ));
         }
 
         return null;
     };
 
-    const handleMouseEnter = (e, task) => {
-        const tooltipData = `${task.agent.name} - ${task.queue.name}: ${task.start} - ${task.end}`;
-        const rect = e.target.getBoundingClientRect();
-        setTooltipInfo(tooltipData);
-        setTooltipPosition({
-            x: rect.left + window.scrollX + 10,
-            y: rect.top + window.scrollY - 30,
-        });
-    };
-
-    const handleMouseLeave = () => {
-        setTooltipInfo(null);
-    };
-
     return (
-        <Box className="scheduler-table-container" sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px' }}>
-            <TableContainer sx={{ maxHeight: '80vh', overflowY: 'auto' }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell />
-                            {daysOfWeek.map((day, index) => (
-                                <StyledTableCell key={index}>
-                                    {day} ({weekDates[index]})
-                                </StyledTableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {hoursOfDay.map((hour, index) => (
-                            <StyledTableRow key={index}>
-                                <StyledTableCell>{hour}</StyledTableCell>
-                                {daysOfWeek.map((day, dayIndex) => (
-                                    <StyledTableCell key={dayIndex}>
-                                        {getRowContent(dayIndex, index, weekDates[dayIndex])}
+        <Box sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <Typography variant="h6" sx={{ textAlign: 'center', marginX: '10px' }}>
+                    {format(currentDate, 'MMMM dd, yyyy')} - {format(addDays(currentDate, 6), 'MMMM dd, yyyy')}
+                </Typography>
+                <Box className="inline-buttons">
+                    <IconButton onClick={handlePrevWeek}>
+                        <ArrowBackIcon />
+                    </IconButton>
+                    <IconButton onClick={handleNextWeek}>
+                        <ArrowForwardIcon />
+                    </IconButton>
+                </Box>
+            </Box>
+
+            {isLoading ? (
+                <Typography variant="h6" sx={{ textAlign: 'center' }}>
+                    Loading...
+                </Typography>
+            ) : (
+                <TableContainer sx={{ maxHeight: '80vh', overflowY: 'auto' }}>
+                    <Table stickyHeader>
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell />
+                                {daysOfWeek.map((day, index) => (
+                                    <StyledTableCell key={index}>
+                                        {day} ({getWeekDates[index]})
                                     </StyledTableCell>
                                 ))}
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
-
-            {tooltipInfo && (
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: tooltipPosition.y,
-                        left: tooltipPosition.x,
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        color: 'white',
-                        padding: '8px',
-                        borderRadius: '5px',
-                        zIndex: 10,
-                        fontSize: '12px',
-                        whiteSpace: 'nowrap',
-                    }}
-                >
-                    {tooltipInfo}
-                </Box>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {hoursOfDay.map((hour, index) => (
+                                <StyledTableRow key={index}>
+                                    <StyledTableCell>{hour}</StyledTableCell>
+                                    {daysOfWeek.map((day, dayIndex) => (
+                                        <StyledTableCell key={dayIndex}>
+                                            {getRowContent(dayIndex, index, getWeekDates[dayIndex])}
+                                        </StyledTableCell>
+                                    ))}
+                                </StyledTableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             )}
         </Box>
     );

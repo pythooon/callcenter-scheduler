@@ -129,7 +129,7 @@ const Scheduler = () => {
                     </Box>
 
                     {selectedTab === 5 && (
-                        <Box display="flex" justifyContent="center" className="generate-btn-container">
+                        <Box display="flex" justifyContent="center" alignItems="center" className="generate-btn-container">
                             <GenerateButton
                                 variant="contained"
                                 onClick={handleGenerateSchedule}

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Scheduler\Infrastructure\Controller;
 
 use App\Scheduler\Application\SchedulerFacade;
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
 final class ScheduleController extends AbstractController
@@ -58,9 +60,24 @@ final class ScheduleController extends AbstractController
     }
 
     #[Route("/api/scheduler/shifts", name: "scheduler_shifts", methods: ["GET"])]
-    public function shifts(): JsonResponse
+    public function shifts(Request $request): JsonResponse
     {
-        $shifts = $this->facade->shifts();
+        $start = $request->query->get('start_date');
+        $end = $request->query->get('end_date');
+
+        $startDate = null;
+        $endDate = null;
+
+        if ($start !== null && is_string($start) && strtotime($start) !== false) {
+            $startDate = new DateTime($start);
+        }
+
+        if ($end !== null && is_string($end) && strtotime($end) !== false) {
+            $endDate = new DateTime($end);
+        }
+
+        $shifts = $this->facade->shifts($startDate, $endDate);
+
         return $this->json($shifts->toArray());
     }
 }
