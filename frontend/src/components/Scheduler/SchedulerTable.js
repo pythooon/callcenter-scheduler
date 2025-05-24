@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton, Tooltip } from '@mui/material';
 import { styled } from '@mui/system';
 import { format, addDays, startOfWeek, subDays } from 'date-fns';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -27,6 +27,20 @@ const StyledTableRow = styled(TableRow)({
     },
     '&:hover': {
         backgroundColor: '#f1f1f1',
+    },
+});
+
+const CustomTooltip = styled(Tooltip)({
+    '& .MuiTooltip-tooltip': {
+        backgroundColor: '#333',
+        color: '#fff',
+        fontSize: '14px',
+        borderRadius: '4px',
+        padding: '10px',
+        maxWidth: '300px',
+        whiteSpace: 'normal',
+        wordBreak: 'break-word',
+        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
     },
 });
 
@@ -96,22 +110,36 @@ const SchedulerTable = () => {
         });
 
         if (tasksForThisHour.length > 0) {
-            return tasksForThisHour.map((task, index) => (
-                <Box
-                    key={index}
-                    sx={{
-                        backgroundColor: '#c5e1a5',
-                        padding: '6px',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-                        position: 'relative',
-                    }}
-                >
-                    <Typography variant="body2" color="textPrimary">{task.agent.name}</Typography>
-                    <Typography variant="body2" color="textSecondary">{task.queue.name}</Typography>
-                </Box>
-            ));
+            return tasksForThisHour.map((task, index) => {
+                const taskStart = new Date(task.start);
+                const taskEnd = new Date(task.end);
+                return (
+                    <CustomTooltip
+                        key={index}
+                        title={`
+                            Agent: ${task.agent.name} | 
+                            Queue: ${task.queue.name} | 
+                            Time: ${format(taskStart, 'HH:mm')} - ${format(taskEnd, 'HH:mm')}
+                        `}
+                        placement="top"
+                        arrow
+                    >
+                        <Box
+                            sx={{
+                                backgroundColor: '#c5e1a5',
+                                padding: '6px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                                position: 'relative',
+                            }}
+                        >
+                            <Typography variant="body2" color="textPrimary">{task.agent.name}</Typography>
+                            <Typography variant="body2" color="textSecondary">{task.queue.name}</Typography>
+                        </Box>
+                    </CustomTooltip>
+                );
+            });
         }
 
         return null;
