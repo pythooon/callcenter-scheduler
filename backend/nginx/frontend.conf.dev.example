@@ -1,10 +1,16 @@
 server {
     listen 80;
+    server_name call-center.pythdev.pl;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 80;
     listen 443 ssl;
     server_name call-center.pythdev.pl;
 
-    ssl_certificate /etc/ssl/certs/nginx.crt;
-    ssl_certificate_key /etc/ssl/private/nginx.key;
+    ssl_certificate /etc/ssl/certs/frontend.crt;
+    ssl_certificate_key /etc/ssl/private/frontend.key;
 
     location / {
         auth_basic "Access Denied";

@@ -6,15 +6,20 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 generate_ssl_certificates() {
-    if [ -f ./backend/nginx/certs/nginx.crt ] && [ -f ./backend/nginx/private/nginx.key ]; then
+    if [ -f ./backend/nginx/certs/api.crt ] && [ -f ./backend/nginx/private/api.key ] && \
+       [ -f ./backend/nginx/certs/frontend.crt ] && [ -f ./backend/nginx/private/frontend.key ]; then
         echo "SSL certificates already exist, skipping generation."
     else
         echo "Generating self-signed SSL certificates..."
+
         mkdir -p ./backend/nginx/certs
         mkdir -p ./backend/nginx/private
 
-        openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/nginx.key -x509 -out ./backend/nginx/certs/nginx.crt -days 365 \
+        openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/api.key -x509 -out ./backend/nginx/certs/api.crt -days 365 \
             -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=api.scheduler"
+
+        openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/frontend.key -x509 -out ./backend/nginx/certs/frontend.crt -days 365 \
+            -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=frontend.scheduler"
     fi
 }
 
