@@ -5,7 +5,7 @@ import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShi
 import DataGridTable from './DataGridTable';
 import SchedulerTable from './SchedulerTable';
 import TabsComponent from './TabsComponent';
-import { GenerateButton, MainContent, BackgroundContainer } from './StyledComponents';
+import { MainContent, BackgroundContainer } from './StyledComponents';
 import './Scheduler.css';
 
 const Scheduler = () => {
@@ -31,6 +31,17 @@ const Scheduler = () => {
         { label: 'Shifts', key: 'shifts', fetchData: fetchShifts },
         { label: 'Scheduler', key: 'scheduler' },
     ];
+
+    useEffect(() => {
+        const storedTab = localStorage.getItem('selectedTab');
+        if (storedTab) {
+            setSelectedTab(Number(storedTab));
+        }
+    }, []);
+
+    useEffect(() => {
+        localStorage.setItem('selectedTab', selectedTab);
+    }, [selectedTab]);
 
     useEffect(() => {
         const fetchDataForTab = async () => {
@@ -107,7 +118,6 @@ const Scheduler = () => {
             <TabsComponent selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabData={tabData} />
             <Container maxWidth="lg" className="scheduler-container">
                 <MainContent>
-
                     <Box className="content-container">
                         <motion.div
                             key={selectedTab}

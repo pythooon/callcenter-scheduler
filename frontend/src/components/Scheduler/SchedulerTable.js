@@ -14,7 +14,7 @@ const StyledTableCell = styled(TableCell)(({ theme, isHighlighted, isToday }) =>
     height: '80px',
     width: '120px',
     border: '1px solid #ddd',
-    backgroundColor: isHighlighted ? '#c5e1a5' : 'transparent',
+    backgroundColor: isHighlighted ? '#c5e1a5' : isToday ? '#ffeb3b' : 'transparent',
     transition: 'background-color 0.3s, transform 0.3s',
     '&:hover': {
         backgroundColor: '#f0f0f0',
@@ -171,7 +171,19 @@ const SchedulerTable = () => {
 
             {isLoading ? (
                 <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
-                    <Typography variant="h6">Loading...</Typography>
+                    <TableContainer sx={{ minHeight: '65vh', overflowY: 'auto', minWidth: '80vh' }}>
+                        <Table stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <Typography variant="h6">
+                                    Loading...
+                                </Typography>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
                 </Box>
             ) : (
                 <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto', minWidth: '80vh' }}>
