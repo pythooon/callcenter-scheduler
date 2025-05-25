@@ -27,7 +27,10 @@ final readonly class ScheduleGenerate
     ) {
     }
 
-    public function createWeeklySchedule(): void
+    /**
+     * @return list<ShiftCreateContract>
+     */
+    public function createWeeklySchedule(): array
     {
         $efficiencyList = $this->efficiencyRepository->findAll();
         $predictionList = $this->predictionRepository->findAll();
@@ -37,6 +40,8 @@ final readonly class ScheduleGenerate
         foreach ($schedule as $shiftCreate) {
             $this->shiftRepository->upsert($shiftCreate);
         }
+
+        return $schedule;
     }
 
     /**

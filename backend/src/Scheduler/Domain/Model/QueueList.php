@@ -12,7 +12,7 @@ final class QueueList implements QueueListContract
     /**
      * @var list<QueueReadContract>
      */
-    private array $items;
+    private array $items = [];
 
     public function addItem(QueueReadContract $contract): void
     {
