@@ -1,7 +1,7 @@
 server {
     listen 80;
     listen 443 ssl;
-    server_name frontend.scheduler;
+    server_name call-center.pythdev.pl;
 
     ssl_certificate /etc/ssl/certs/nginx.crt;
     ssl_certificate_key /etc/ssl/private/nginx.key;
