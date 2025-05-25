@@ -107,17 +107,7 @@ const Scheduler = () => {
             <TabsComponent selectedTab={selectedTab} setSelectedTab={setSelectedTab} tabData={tabData} />
             <Container maxWidth="lg" className="scheduler-container">
                 <MainContent>
-                    {selectedTab === 5 && (
-                        <Box display="flex" justifyContent="center" className="generate-btn-container">
-                            <GenerateButton
-                                variant="contained"
-                                onClick={handleGenerateSchedule}
-                                disabled={generateLoading}
-                            >
-                                {generateLoading ? 'Generating...' : 'Generate Schedule'}
-                            </GenerateButton>
-                        </Box>
-                    )}
+
                     <Box className="content-container">
                         <motion.div
                             key={selectedTab}

@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton, Tooltip } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton, Tooltip, Button } from '@mui/material';
 import { styled } from '@mui/system';
 import { format, addDays, startOfWeek, subDays } from 'date-fns';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
@@ -84,7 +84,6 @@ const SchedulerTable = () => {
         setCurrentDate(newDate);
     };
 
-    // Now, this useEffect is only triggered by manual week change
     useEffect(() => {
         const startOfWeekDate = format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
         const endOfWeekDate = format(addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
@@ -141,12 +140,20 @@ const SchedulerTable = () => {
     };
 
     return (
-        <Box sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                <Typography variant="h6" sx={{ textAlign: 'center', marginX: '10px' }}>
-                    {format(subDays(currentDate, 6), 'MMMM dd, yyyy')} - {format(currentDate, 'MMMM dd, yyyy')}
-                </Typography>
-                <Box className="inline-buttons">
+        <Box sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px', width: '100%' }}>
+            <Box sx={{ display: 'inline', width: '100%' }}>
+                {/* Layout for Title, Button and Arrows */}
+                <Box sx={{ display: 'inline', float: 'left', width: '20%' }}>
+                    <Button variant="contained" color="primary" fullWidth onClick={() => console.log('Generate Schedule')}>
+                        Generate Schedule
+                    </Button>
+                </Box>
+                <Box sx={{ display: 'inline', float: 'left', width: '70%' }}>
+                    <Typography variant="h6" sx={{ textAlign: 'center', marginX: '10px' }}>
+                        {format(subDays(currentDate, 6), 'MMMM dd, yyyy')} - {format(currentDate, 'MMMM dd, yyyy')}
+                    </Typography>
+                </Box>
+                <Box sx={{ display: 'inline', float: 'right', width: '10%' }}>
                     <IconButton onClick={handlePrevWeek}>
                         <ArrowBackIcon />
                     </IconButton>
@@ -156,12 +163,26 @@ const SchedulerTable = () => {
                 </Box>
             </Box>
 
+            {/* Loading Indicator */}
             {isLoading ? (
-                <Typography variant="h6" sx={{ textAlign: 'center' }}>
-                    Loading...
-                </Typography>
+                <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
+
+                    <TableContainer sx={{ minHeight: '65vh', overflowY: 'auto', minWidth: '80vh' }}>
+                        <Table stickyHeader>
+                            <TableHead>
+                                <TableRow>
+                                </TableRow>
+                            </TableHead>
+                            <TableBody>
+                                <Typography variant="h6">
+                                    Loading...
+                                </Typography>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </Box>
             ) : (
-                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto' }}>
+                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto', minWidth: '80vh'  }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
