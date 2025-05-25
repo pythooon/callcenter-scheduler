@@ -6,7 +6,6 @@ namespace App\Scheduler\Domain\UseCase\Shifts;
 
 use App\Scheduler\Application\Contract\ShiftListContract;
 use App\Scheduler\Application\Repository\ShiftRepository;
-use DateTime;
 use DateTimeInterface;
 
 final readonly class Shifts

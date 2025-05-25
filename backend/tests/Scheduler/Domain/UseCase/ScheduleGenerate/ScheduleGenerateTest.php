@@ -4,16 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Scheduler\Domain\UseCase\ScheduleGenerate;
 
-use App\Scheduler\Application\Contract\AgentReadContract;
-use App\Scheduler\Application\Contract\EfficiencyListContract;
-use App\Scheduler\Application\Contract\EfficiencyReadContract;
-use App\Scheduler\Application\Contract\PredictionListContract;
-use App\Scheduler\Application\Contract\PredictionReadContract;
-use App\Scheduler\Application\Contract\QueueReadContract;
 use App\Scheduler\Application\Contract\ShiftCreateContract;
 use App\Scheduler\Application\Repository\EfficiencyRepository;
 use App\Scheduler\Application\Repository\PredictionRepository;
 use App\Scheduler\Application\Repository\ShiftRepository;
+use App\Scheduler\Domain\Mapper\ShiftMapper;
 use App\Scheduler\Domain\Model\AgentRead;
 use App\Scheduler\Domain\Model\EfficiencyList;
 use App\Scheduler\Domain\Model\EfficiencyRead;
@@ -22,7 +17,6 @@ use App\Scheduler\Domain\Model\PredictionRead;
 use App\Scheduler\Domain\Model\QueueList;
 use App\Scheduler\Domain\Model\QueueRead;
 use App\Scheduler\Domain\UseCase\ScheduleGenerate\ScheduleGenerate;
-use App\Scheduler\Domain\Mapper\ShiftMapper;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
