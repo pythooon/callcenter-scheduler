@@ -186,7 +186,7 @@ const SchedulerTable = () => {
                     </TableContainer>
                 </Box>
             ) : (
-                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto', minWidth: '80vh' }}>
+                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto', overflowX: 'hidden', minWidth: '80vh' }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
