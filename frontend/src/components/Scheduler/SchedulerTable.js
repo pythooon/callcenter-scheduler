@@ -77,19 +77,14 @@ const SchedulerTable = () => {
     const handlePrevWeek = () => {
         const newDate = subDays(currentDate, 7);
         setCurrentDate(newDate);
-        const startOfWeekDate = format(startOfWeek(newDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
-        const endOfWeekDate = format(addDays(startOfWeek(newDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
-        fetchScheduleData(startOfWeekDate, endOfWeekDate);
     };
 
     const handleNextWeek = () => {
         const newDate = addDays(currentDate, 7);
         setCurrentDate(newDate);
-        const startOfWeekDate = format(startOfWeek(newDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
-        const endOfWeekDate = format(addDays(startOfWeek(newDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
-        fetchScheduleData(startOfWeekDate, endOfWeekDate);
     };
 
+    // Now, this useEffect is only triggered by manual week change
     useEffect(() => {
         const startOfWeekDate = format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
         const endOfWeekDate = format(addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');

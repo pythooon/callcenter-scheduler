@@ -9,15 +9,18 @@ use App\Scheduler\Application\Contract\QueueReadContract;
 use DateTimeInterface;
 use Symfony\Component\Uid\Uuid;
 
-final readonly class PredictionRead implements PredictionReadContract
+final class PredictionRead implements PredictionReadContract
 {
+    private int $diffOccupancy;
+
     public function __construct(
-        private Uuid $id,
-        private QueueReadContract $queue,
-        private DateTimeInterface $date,
-        private DateTimeInterface $time,
-        private int $occupancy
+        private readonly Uuid $id,
+        private readonly QueueReadContract $queue,
+        private readonly DateTimeInterface $date,
+        private readonly DateTimeInterface $time,
+        private readonly int $occupancy
     ) {
+        $this->diffOccupancy = $occupancy;
     }
 
     public function getId(): Uuid
@@ -43,6 +46,12 @@ final readonly class PredictionRead implements PredictionReadContract
     public function getOccupancy(): int
     {
         return $this->occupancy;
+    }
+
+    public function diffOccupancy(float $score): int
+    {
+        $this->diffOccupancy -= (int) floor($score);
+        return $this->diffOccupancy;
     }
 
     public function toArray(): array

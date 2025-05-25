@@ -6,12 +6,16 @@ namespace App\Scheduler\Infrastructure\DataFixtures;
 
 use App\Scheduler\Domain\Entity\Agent;
 use App\Scheduler\Domain\Entity\CallHistory;
-use App\Scheduler\Domain\Entity\Prediction;
 use App\Scheduler\Domain\Entity\Queue;
-use App\Scheduler\Domain\Entity\Shift;
+use App\Scheduler\Domain\Entity\Prediction;
+use DateInterval;
+use DateMalformedPeriodStringException;
+use DatePeriod;
+use DateTime;
+use Random\RandomException;
+use Symfony\Component\Uid\Uuid;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
-use Symfony\Component\Uid\Uuid;
 
 class AppFixtures extends Fixture
 {
@@ -19,6 +23,10 @@ class AppFixtures extends Fixture
     {
     }
 
+    /**
+     * @throws RandomException
+     * @throws DateMalformedPeriodStringException
+     */
     public function load(ObjectManager $manager): void
     {
         $queues = ['Sales', 'Technical Support', 'Complaints'];
@@ -40,6 +48,16 @@ class AppFixtures extends Fixture
             ['name' => 'Bob Taylor', 'queues' => ['Sales', 'Complaints']],
             ['name' => 'Emily Brown', 'queues' => ['Complaints', 'Sales']],
             ['name' => 'David Green', 'queues' => ['Sales']],
+            ['name' => 'Michael Clark', 'queues' => ['Sales', 'Technical Support']],
+            ['name' => 'Sara Lee', 'queues' => ['Sales', 'Complaints']],
+            ['name' => 'Tom White', 'queues' => ['Technical Support', 'Complaints']],
+            ['name' => 'Anna Black', 'queues' => ['Sales', 'Technical Support']],
+            ['name' => 'Peter Adams', 'queues' => ['Technical Support', 'Complaints']],
+            ['name' => 'Sophia Taylor', 'queues' => ['Sales', 'Complaints']],
+            ['name' => 'Lucas Mitchell', 'queues' => ['Technical Support', 'Sales']],
+            ['name' => 'Nina Scott', 'queues' => ['Complaints', 'Sales']],
+            ['name' => 'Oliver Harris', 'queues' => ['Sales']],
+            ['name' => 'Grace King', 'queues' => ['Technical Support', 'Sales']],
         ];
 
         foreach ($agents as $agentData) {
@@ -58,11 +76,58 @@ class AppFixtures extends Fixture
         }
         $manager->flush();
 
-        $endDate = new \DateTime();
+        $startDate = new DateTime('2025-02-01');
+        $endDate = new DateTime('2025-05-23');
+        $dateInterval = new DateInterval('P1D');
+        $period = new DatePeriod($startDate, $dateInterval, $endDate);
+
+        foreach ($period as $date) {
+            if (in_array($date->format('N'), [6, 7])) {
+                continue;
+            }
+
+            foreach ($agents as $agentData) {
+                $agent = $manager->getRepository(Agent::class)->findOneBy(['name' => $agentData['name']]);
+                if (!$agent) {
+                    continue;
+                }
+                $queueName = $agentData['queues'][array_rand($agentData['queues'])];
+                $queue = $manager->getRepository(Queue::class)->findOneBy(['name' => $queueName]);
+                if (!$queue) {
+                    continue;
+                }
+
+                if (random_int(0, 100) < 60) {
+                    $startHour = random_int(7, 18);
+                    $shiftStart = (clone $date)->setTime($startHour, 0, 0);
+                    $shiftDuration = random_int(2, 10);
+
+                    for ($i = 0; $i < $shiftDuration; $i++) {
+                        $shiftEnd = (clone $shiftStart)->modify('+1 hour');
+
+                        $shiftStart = $shiftEnd;
+                    }
+
+                    $midShift = (clone $shiftStart)->modify('+2 hours');
+                    $callHistory = new CallHistory();
+                    $callHistory->setId(Uuid::v4());
+                    $callHistory->setAgent($agent);
+                    $callHistory->setQueue($queue);
+                    $callHistory->setDate($midShift);
+                    $callHistory->setCallsCount(random_int(10, 60));
+
+                    $manager->persist($callHistory);
+                }
+            }
+        }
+
+        $manager->flush();
+
+        $endDate = new DateTime();
         $startDate = (clone $endDate)->modify('+1 day');
         $oneMonthLater = (clone $startDate)->modify('+1 month');
-        $predictionInterval = new \DateInterval('PT1H');
-        $predictionPeriod = new \DatePeriod($startDate, $predictionInterval, $oneMonthLater);
+        $predictionInterval = new DateInterval('PT1H');
+        $predictionPeriod = new DatePeriod($startDate, $predictionInterval, $oneMonthLater);
 
         foreach ($predictionPeriod as $date) {
             if (in_array($date->format('N'), [6, 7])) {
@@ -85,7 +150,7 @@ class AppFixtures extends Fixture
                         continue;
                     }
 
-                    $occupancy = random_int(5, 20);
+                    $occupancy = random_int(1, 10) * 10;
 
                     $prediction = new Prediction(
                         id: Uuid::v4(),

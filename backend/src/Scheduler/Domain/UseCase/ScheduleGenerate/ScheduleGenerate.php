@@ -14,6 +14,7 @@ use App\Scheduler\Application\Repository\EfficiencyRepository;
 use App\Scheduler\Application\Repository\PredictionRepository;
 use App\Scheduler\Application\Repository\ShiftRepository;
 use App\Scheduler\Domain\Mapper\ShiftMapper;
+use App\Scheduler\Domain\Model\EfficiencyList;
 
 final readonly class ScheduleGenerate
 {
@@ -66,6 +67,9 @@ final readonly class ScheduleGenerate
                         $agentDailyWorkHours[$agentId][$prediction->getDate()->format(
                             'Y-m-d'
                         )] = $currentDailyHours + 1;
+                        if ($prediction->diffOccupancy($agent->getScore($prediction->getQueue()->getId())) <= 0) {
+                            break;
+                        }
                     }
                 }
             }
@@ -82,20 +86,13 @@ final readonly class ScheduleGenerate
         PredictionReadContract $prediction
     ): array {
         $agents = [];
-        $efficiencies = [];
 
         foreach ($efficiencyList->getItems() as $efficiency) {
             if ($efficiency->getQueue()->getId() === $prediction->getQueue()->getId()) {
-                $efficiencies[] = $efficiency;
+                $agent = $efficiency->getAgent();
+                $agent->addEfficiency($efficiency);
+                $agents[] = $agent;
             }
-        }
-
-        usort($efficiencies, function (EfficiencyReadContract $a, EfficiencyReadContract $b) {
-            return $b->getScore() <=> $a->getScore();
-        });
-
-        foreach ($efficiencies as $efficiency) {
-            $agents[] = $efficiency->getAgent();
         }
 
         return $agents;

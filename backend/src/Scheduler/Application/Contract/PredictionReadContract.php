@@ -19,4 +19,6 @@ interface PredictionReadContract extends Arrayable
     public function getTime(): DateTimeInterface;
 
     public function getOccupancy(): int;
+
+    public function diffOccupancy(float $score): int;
 }

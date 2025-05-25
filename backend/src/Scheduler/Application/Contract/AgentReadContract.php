@@ -15,11 +15,13 @@ interface AgentReadContract extends Arrayable
 
     public function getQueues(): QueueListContract;
 
-    public function setEfficiencyListContract(EfficiencyListContract $efficiencyListContract): void;
+    public function addEfficiency(EfficiencyReadContract $efficiencyReadContract): void;
 
     public function getEfficiencyListContract(): EfficiencyListContract;
 
     public function calculateEfficiency(CallHistoryListContract $callHistoryListContract): void;
+
+    public function getScore(Uuid $queueId): float;
 
     /**
      * @return array{

@@ -7,6 +7,7 @@ namespace App\Scheduler\Domain\Model;
 use App\Scheduler\Application\Contract\AgentReadContract;
 use App\Scheduler\Application\Contract\CallHistoryListContract;
 use App\Scheduler\Application\Contract\EfficiencyListContract;
+use App\Scheduler\Application\Contract\EfficiencyReadContract;
 use App\Scheduler\Application\Contract\QueueListContract;
 use Symfony\Component\Uid\Uuid;
 
@@ -19,6 +20,7 @@ final class AgentRead implements AgentReadContract
         private readonly string $name,
         private readonly QueueListContract $queues
     ) {
+        $this->efficiencyListContract = new EfficiencyList();
     }
 
     public function getId(): Uuid
@@ -36,15 +38,23 @@ final class AgentRead implements AgentReadContract
         return $this->queues;
     }
 
-    public function setEfficiencyListContract(EfficiencyListContract $efficiencyListContract): void
+    public function addEfficiency(EfficiencyReadContract $efficiencyReadContract): void
     {
-        $this->efficiencyListContract = $efficiencyListContract;
+        $this->efficiencyListContract->addItem($efficiencyReadContract);
     }
-
 
     public function getEfficiencyListContract(): EfficiencyListContract
     {
         return $this->efficiencyListContract;
+    }
+
+    public function getScore(Uuid $queueId): float
+    {
+        return array_filter(
+            $this->efficiencyListContract->getItems(),
+            fn(EfficiencyReadContract $efficiencyReadContract) => $efficiencyReadContract->getQueue()->getId(
+                ) === $queueId
+        )[0]->getScore() ?? 0.0;
     }
 
     public function calculateEfficiency(CallHistoryListContract $callHistoryListContract): void
@@ -94,7 +104,7 @@ final class AgentRead implements AgentReadContract
     public function toArray(): array
     {
         return [
-            'id' => (string) $this->id,
+            'id' => (string)$this->id,
             'name' => $this->name,
         ];
     }
