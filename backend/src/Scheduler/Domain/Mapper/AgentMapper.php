@@ -9,10 +9,7 @@ use App\Scheduler\Application\Contract\AgentReadContract;
 use App\Scheduler\Domain\Entity\Agent;
 use App\Scheduler\Domain\Model\AgentList;
 use App\Scheduler\Domain\Model\AgentRead;
-use App\Scheduler\Domain\Model\EfficiencyList;
 use App\Scheduler\Domain\Model\QueueList;
-
-use function var_dump;
 
 final readonly class AgentMapper
 {

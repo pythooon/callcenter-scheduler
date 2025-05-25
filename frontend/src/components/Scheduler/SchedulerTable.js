@@ -6,7 +6,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { fetchShifts } from '../../api';
 
-const StyledTableCell = styled(TableCell)({
+const StyledTableCell = styled(TableCell)(({ theme, isHighlighted }) => ({
     padding: '12px',
     textAlign: 'center',
     verticalAlign: 'middle',
@@ -14,12 +14,13 @@ const StyledTableCell = styled(TableCell)({
     height: '80px',
     width: '120px',
     border: '1px solid #ddd',
+    backgroundColor: isHighlighted ? '#c5e1a5' : 'transparent',
     transition: 'background-color 0.3s, transform 0.3s',
     '&:hover': {
         backgroundColor: '#f0f0f0',
         transform: 'scale(1.05)',
     },
-});
+}));
 
 const StyledTableRow = styled(TableRow)({
     '&:nth-of-type(odd)': {
@@ -139,10 +140,15 @@ const SchedulerTable = () => {
         return null;
     };
 
+    const isToday = (dateString) => {
+        const today = new Date();
+        const targetDate = new Date(dateString);
+        return today.toDateString() === targetDate.toDateString();
+    };
+
     return (
         <Box sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px', width: '100%' }}>
             <Box sx={{ display: 'inline', width: '100%' }}>
-                {/* Layout for Title, Button and Arrows */}
                 <Box sx={{ display: 'inline', float: 'left', width: '20%' }}>
                     <Button variant="contained" color="primary" fullWidth onClick={() => console.log('Generate Schedule')}>
                         Generate Schedule
@@ -163,26 +169,12 @@ const SchedulerTable = () => {
                 </Box>
             </Box>
 
-            {/* Loading Indicator */}
             {isLoading ? (
                 <Box sx={{ textAlign: 'center', marginTop: '20px' }}>
-
-                    <TableContainer sx={{ minHeight: '65vh', overflowY: 'auto', minWidth: '80vh' }}>
-                        <Table stickyHeader>
-                            <TableHead>
-                                <TableRow>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                <Typography variant="h6">
-                                    Loading...
-                                </Typography>
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <Typography variant="h6">Loading...</Typography>
                 </Box>
             ) : (
-                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto', minWidth: '80vh'  }}>
+                <TableContainer sx={{ maxHeight: '65vh', overflowY: 'auto', minWidth: '80vh' }}>
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
@@ -199,7 +191,7 @@ const SchedulerTable = () => {
                                 <StyledTableRow key={index}>
                                     <StyledTableCell>{hour}</StyledTableCell>
                                     {daysOfWeek.map((day, dayIndex) => (
-                                        <StyledTableCell key={dayIndex}>
+                                        <StyledTableCell key={dayIndex} isHighlighted={isToday(getWeekDates[dayIndex])}>
                                             {getRowContent(dayIndex, index, getWeekDates[dayIndex])}
                                         </StyledTableCell>
                                     ))}

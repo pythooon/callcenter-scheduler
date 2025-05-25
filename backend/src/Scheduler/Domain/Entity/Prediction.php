@@ -29,20 +29,6 @@ class Prediction
     #[ORM\Column(type: 'integer')]
     private int $occupancy;
 
-    public function __construct(
-        Uuid $id,
-        Queue $queue,
-        \DateTimeInterface $date,
-        \DateTimeInterface $time,
-        int $occupancy
-    ) {
-        $this->id = $id;
-        $this->queue = $queue;
-        $this->date = $date;
-        $this->time = $time;
-        $this->occupancy = $occupancy;
-    }
-
     public function getId(): Uuid
     {
         return $this->id;

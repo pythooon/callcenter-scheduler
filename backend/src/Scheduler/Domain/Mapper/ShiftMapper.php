@@ -23,7 +23,6 @@ final readonly class ShiftMapper
      */
     public static function mapArrayToListContract(array $items): ShiftListContract
     {
-        // Sortowanie elementów od najstarszego do najnowszego (po dacie rozpoczęcia)
         usort($items, function (Shift $a, Shift $b) {
             return $a->getStart() <=> $b->getStart();
         });
