@@ -6,7 +6,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { fetchShifts } from '../../api';
 
-const StyledTableCell = styled(TableCell)(({ theme, isHighlighted }) => ({
+const StyledTableCell = styled(TableCell)(({ theme, isHighlighted, isToday }) => ({
     padding: '12px',
     textAlign: 'center',
     verticalAlign: 'middle',
@@ -180,7 +180,13 @@ const SchedulerTable = () => {
                             <TableRow>
                                 <StyledTableCell />
                                 {daysOfWeek.map((day, index) => (
-                                    <StyledTableCell key={index}>
+                                    <StyledTableCell
+                                        key={index}
+                                        isHighlighted={isToday(getWeekDates[index])}
+                                        style={{
+                                            backgroundColor: isToday(getWeekDates[index]) ? '#c5e1a5' : 'transparent',
+                                        }}
+                                    >
                                         {day} ({getWeekDates[index]})
                                     </StyledTableCell>
                                 ))}
