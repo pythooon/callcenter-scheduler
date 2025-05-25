@@ -152,13 +152,12 @@ class AppFixtures extends Fixture
 
                     $occupancy = random_int(1, 10) * 10;
 
-                    $prediction = new Prediction(
-                        id: Uuid::v4(),
-                        queue: $queue,
-                        date: $date,
-                        time: $time,
-                        occupancy: $occupancy,
-                    );
+                    $prediction = new Prediction();
+                    $prediction->setId(Uuid::v4());
+                    $prediction->setQueue($queue);
+                    $prediction->setDate($date);
+                    $prediction->setTime($time);
+                    $prediction->setOccupancy($occupancy);
 
                     $manager->persist($prediction);
                 }
