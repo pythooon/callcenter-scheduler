@@ -1,0 +1,160 @@
+#!/bin/bash
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root. Use sudo."
+    exit 1
+fi
+
+generate_ssl_certificates() {
+    if [ -f ./backend/nginx/certs/nginx.crt ] && [ -f ./backend/nginx/private/nginx.key ]; then
+        echo "SSL certificates already exist, skipping generation."
+    else
+        echo "Generating self-signed SSL certificates..."
+        mkdir -p ./backend/nginx/certs
+        mkdir -p ./backend/nginx/private
+
+        openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/nginx.key -x509 -out ./backend/nginx/certs/nginx.crt -days 365 \
+            -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=api.scheduler"
+    fi
+}
+
+copy_nginx_config_files() {
+    echo "Copying Nginx config files from example to actual config..."
+    cp ./backend/nginx/api.conf.example ./backend/nginx/api.conf
+    cp ./backend/nginx/frontend.conf.example ./backend/nginx/frontend.conf
+}
+
+show_menu() {
+    clear
+    echo "--------------------------------"
+    echo " Docker Compose Management Menu"
+    echo "--------------------------------"
+    echo "1) Build services"
+    echo "2) Restart services"
+    echo "3) Force recreate services"
+    echo "4) Build & Restart a specific service"
+    echo "5) Build all services & Restart"
+    echo "6) Start all services"
+    echo "7) View logs"
+    echo "8) View logs for a specific service"
+    echo "9) Check Docker status"
+    echo "10) Shutdown and remove all services"
+    echo "11) Exit"
+    echo "--------------------------------"
+}
+
+build_services() {
+    echo "Building all services..."
+    docker compose build
+}
+
+restart_services() {
+    echo "Restarting all services..."
+    docker compose restart
+}
+
+force_recreate_services() {
+    echo "Force recreating all services..."
+    docker compose up --force-recreate -d
+}
+
+build_and_restart_service() {
+    echo "Enter the service name to build & restart:"
+    read service
+    docker compose up --build --no-deps -d $service
+}
+
+build_all_and_restart() {
+    docker compose up --build -d
+    echo "All services built and restarted!"
+}
+
+start_services() {
+    echo "Starting all services..."
+    docker compose up -d
+}
+
+view_logs() {
+    echo "Viewing logs for all services..."
+    docker compose logs -f
+}
+
+view_logs_for_service() {
+    echo "Enter the service name to view logs:"
+    read service
+    if [[ -z "$service" ]]; then
+        echo "Error: No service name provided."
+        return
+    fi
+    docker compose logs -f $service
+}
+
+check_docker_status() {
+    echo "Checking Docker Compose status..."
+    docker compose ps
+}
+
+shutdown_and_remove_all_services() {
+    echo "Shutting down and removing all services..."
+    docker compose down --volumes --remove-orphans
+    echo "All services shut down and removed."
+}
+
+set_permissions() {
+    echo "Setting permissions for the script..."
+    chmod +x run.sh
+    chmod -R 755 ./backend/db_data
+    echo "Permissions set successfully!"
+}
+
+while true; do
+    generate_ssl_certificates
+    copy_nginx_config_files
+
+    show_menu
+    echo -n "Select an option: "
+    read option
+
+    case $option in
+        1)
+            build_services
+            ;;
+        2)
+            restart_services
+            ;;
+        3)
+            force_recreate_services
+            ;;
+        4)
+            build_and_restart_service
+            ;;
+        5)
+            build_all_and_restart
+            ;;
+        6)
+            start_services
+            ;;
+        7)
+            view_logs
+            ;;
+        8)
+            view_logs_for_service
+            ;;
+        9)
+            check_docker_status
+            ;;
+        10)
+            shutdown_and_remove_all_services
+            ;;
+        11)
+            echo "Exiting..."
+            exit 0
+            ;;
+        *)
+            echo "Invalid option. Please try again."
+            ;;
+    esac
+
+    echo "Press any key to continue..."
+    read -n 1 -s
+done

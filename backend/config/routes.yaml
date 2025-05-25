@@ -1,10 +1,6 @@
 controllers:
     resource: '../src/*/Infrastructure/Controller'
     type: attribute
-api_scheduler_calculate_efficiency:
-    path: /api/scheduler/calculate-efficiency
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::calculateEfficiency
-    methods: [POST]
 scheduler_generate:
     path: /api/scheduler/generate
     controller: App\Scheduler\Infrastructure\Controller\ScheduleController::scheduleGenerate

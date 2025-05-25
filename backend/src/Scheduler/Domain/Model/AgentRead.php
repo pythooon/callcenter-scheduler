@@ -53,8 +53,8 @@ final class AgentRead implements AgentReadContract
         return array_filter(
             $this->efficiencyListContract->getItems(),
             fn(EfficiencyReadContract $efficiencyReadContract) => $efficiencyReadContract->getQueue()->getId(
-                ) === $queueId
-        )[0]->getScore() ?? 0.0;
+            ) === $queueId
+        )[0]->getScore();
     }
 
     public function calculateEfficiency(CallHistoryListContract $callHistoryListContract): void

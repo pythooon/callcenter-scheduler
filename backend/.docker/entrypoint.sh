@@ -27,6 +27,6 @@ if [ "$LOAD_FIXTURES" = "true" ]; then
   php bin/console doctrine:fixtures:load --no-interaction
 fi
 
-composer dump-autoload
+screen -dmS message-consumer sh -c "php /var/www/api/bin/console messenger:consume scheduler_bus > /var/www/api/var/log/message_consumer.log"
 
 exec "$@"

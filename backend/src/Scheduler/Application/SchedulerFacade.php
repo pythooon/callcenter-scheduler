@@ -13,8 +13,6 @@ use DateTime;
 
 interface SchedulerFacade
 {
-    public function calculateEfficiency(): EfficiencyListContract;
-
     public function scheduleGenerate(): void;
 
     public function agents(): AgentListContract;

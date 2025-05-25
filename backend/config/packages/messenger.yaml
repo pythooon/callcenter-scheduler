@@ -1,0 +1,10 @@
+framework:
+  messenger:
+    default_bus: scheduler_bus
+    buses:
+      scheduler_bus:
+        default_middleware: true
+    transports:
+      scheduler_bus: '%env(MESSENGER_TRANSPORT_DSN)%'
+    routing:
+      'App\Scheduler\Infrastructure\Messages\SchedulerGenerateMessage': scheduler_bus

@@ -32,13 +32,9 @@ final readonly class SchedulerFacadeImpl implements SchedulerFacade
     ) {
     }
 
-    public function calculateEfficiency(): EfficiencyListContract
-    {
-        return $this->calculateEfficiency->run();
-    }
-
     public function scheduleGenerate(): void
     {
+        $this->calculateEfficiency->run();
         $this->scheduleGenerate->createWeeklySchedule();
     }
 

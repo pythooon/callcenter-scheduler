@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Box, CircularProgress, Snackbar } from '@mui/material';
 import { motion } from 'framer-motion';
-import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts, calculateEfficiency, generateSchedule } from '../../api';
+import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts, generateSchedule } from '../../api';
 import DataGridTable from './DataGridTable';
 import SchedulerTable from './SchedulerTable';
 import TabsComponent from './TabsComponent';
@@ -11,52 +11,48 @@ import './Scheduler.css';
 const Scheduler = () => {
     const [selectedTab, setSelectedTab] = useState(0);
     const [data, setData] = useState({
-        agents: [],
-        efficiencies: [],
-        queues: [],
-        predictions: [],
-        shifts: [],
+        agents: null,
+        efficiencies: null,
+        queues: null,
+        predictions: null,
+        shifts: null,
     });
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [generateLoading, setGenerateLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [openSnackbar, setOpenSnackbar] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
 
+    const tabData = [
+        { label: 'Agents', key: 'agents', fetchData: fetchAgents },
+        { label: 'Efficiencies', key: 'efficiencies', fetchData: fetchEfficiencies },
+        { label: 'Queues', key: 'queues', fetchData: fetchQueues },
+        { label: 'Predictions', key: 'predictions', fetchData: fetchPredictions },
+        { label: 'Shifts', key: 'shifts', fetchData: fetchShifts },
+        { label: 'Scheduler', key: 'scheduler' },
+    ];
+
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchDataForTab = async () => {
             setLoading(true);
             try {
-                const agentsData = await fetchAgents();
-                const efficienciesData = await fetchEfficiencies();
-                const queuesData = await fetchQueues();
-                const predictionsData = await fetchPredictions();
-                const shiftsData = await fetchShifts();
-
-                setData({
-                    agents: agentsData,
-                    efficiencies: efficienciesData,
-                    queues: queuesData,
-                    predictions: predictionsData,
-                    shifts: shiftsData,
-                });
+                const selectedTabData = tabData[selectedTab];
+                if (selectedTabData && !data[selectedTabData.key]) {
+                    const newData = await selectedTabData.fetchData();
+                    setData(prevData => ({
+                        ...prevData,
+                        [selectedTabData.key]: newData
+                    }));
+                }
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching data for tab:', error);
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
-    }, []);
 
-    const tabData = [
-        { label: 'Agents', key: 'agents' },
-        { label: 'Efficiencies', key: 'efficiencies' },
-        { label: 'Queues', key: 'queues' },
-        { label: 'Predictions', key: 'predictions' },
-        { label: 'Shifts', key: 'shifts' },
-        { label: 'Scheduler', key: 'scheduler' },
-    ];
+        fetchDataForTab();
+    }, [selectedTab]);
 
     const renderTabContent = () => {
         if (loading) {
@@ -70,18 +66,22 @@ const Scheduler = () => {
         if (selectedTab === 5) {
             return (
                 <Box display="flex" justifyContent="center" alignItems="center" height="100%">
-                    <SchedulerTable scheduleData={data.shifts} />
+                    <SchedulerTable scheduleData={data.shifts || []} />
                 </Box>
             );
         }
 
         const selectedData = data[tabData[selectedTab]?.key];
 
-        return (
-            <DataGridTable
-                rows={selectedData}
-            />
-        );
+        if (!selectedData) {
+            return (
+                <Box display="flex" justifyContent="center" alignItems="center" height="100%">
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
+        return <DataGridTable rows={selectedData || []} />;
     };
 
     const handleGenerateSchedule = async () => {
@@ -90,7 +90,6 @@ const Scheduler = () => {
         setSuccessMessage('');
 
         try {
-            await calculateEfficiency();
             await generateSchedule();
             setSuccessMessage('Schedule generated successfully!');
             setOpenSnackbar(true);

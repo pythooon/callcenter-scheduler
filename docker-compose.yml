@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   php:
     build:
@@ -7,13 +5,18 @@ services:
       dockerfile: .docker/Dockerfile
     volumes:
       - ./backend:/var/www/api
+      - ./backend/.docker/consumer.conf:/etc/supervisor/conf.d/consumer.conf
+      - ./backend/.docker/php.ini:/etc/php/8.4/fpm/php.ini
+      - ./backend/.docker/php.ini:/etc/php/8.4/cli/php.ini
     environment:
       WAIT_FOR_DB: "true"
       RUN_MIGRATIONS: "true"
       LOAD_FIXTURES: "true"
       DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@mysql:3306/${MYSQL_DATABASE}"
-    entrypoint: [ "/var/www/api/entrypoint.sh" ]
+    entrypoint: [ "/var/www/api/.docker/entrypoint.sh" ]
     command: [ "php-fpm" ]
+    ports:
+      - "9000:9000"
     depends_on:
       - mysql
     networks:
@@ -23,6 +26,7 @@ services:
     image: nginx:latest
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - ./backend:/var/www/api
       - ./frontend/build:/var/www/app
@@ -30,6 +34,8 @@ services:
       - ./backend/nginx/frontend.conf:/etc/nginx/conf.d/frontend.conf
       - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./backend/nginx/.htpasswd:/etc/nginx/.htpasswd
+      - ./backend/nginx/certs:/etc/ssl/certs
+      - ./backend/nginx/private:/etc/ssl/private
     depends_on:
       - php
       - frontend
@@ -55,13 +61,14 @@ services:
   frontend:
     build:
       context: ./frontend
+      dockerfile: .docker/Dockerfile
     volumes:
       - ./frontend:/var/www/app
     ports:
       - "3000:3000"
     environment:
       - CHOKIDAR_USEPOLLING=true
-    command: npm start
+    command: .docker/entrypoint.sh
     networks:
       - scheduler
 
@@ -74,6 +81,19 @@ services:
       - "8080:8080"
     environment:
       DOZZLE_LEVEL: trace
+    networks:
+      - scheduler
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    command: redis-server --include /usr/local/etc/redis/redis.conf
+    tty: true
+    stdin_open: true
+    volumes:
+      - ./backend/redis/redis.conf:/usr/local/etc/redis/redis.conf
+    ports:
+      - "6379:6379"
     networks:
       - scheduler
 

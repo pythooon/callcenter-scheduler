@@ -51,7 +51,7 @@ const DataGridTable = ({ rows = [] }) => {
         if (paginationModel.page >= totalPages) {
             setPaginationModel((prev) => ({ ...prev, page: 0 }));
         }
-    }, [totalRows, paginationModel.pageSize]);
+    }, [totalRows, paginationModel.pageSize, paginationModel.page, totalPages]);
 
     const handlePageChange = (event, newPage) => {
         setPaginationModel((prev) => ({ ...prev, page: newPage }));
@@ -94,7 +94,7 @@ const DataGridTable = ({ rows = [] }) => {
                             '& .MuiDataGrid-virtualScroller': {
                                 overflow: 'auto !important',
                             },
-                        }}s
+                        }}
                     />
                 )}
             </motion.div>

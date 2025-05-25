@@ -21,3 +21,8 @@ services:
 
     App\Scheduler\Application\SchedulerFacade:
         alias: App\Scheduler\Domain\SchedulerFacadeImpl
+    App\Scheduler\Infrastructure\Messages\SchedulerGenerateMessageHandler:
+        arguments:
+            $facade: '@App\Scheduler\Application\SchedulerFacade'
+        tags:
+            - { name: 'messenger.message_handler', bus: 'scheduler_bus' }

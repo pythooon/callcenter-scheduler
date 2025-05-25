@@ -1,4 +1,4 @@
-const API_URL = 'http://api.scheduler';
+const API_URL = 'https://api.scheduler';
 
 export const fetchAgents = async () => {
     const response = await fetch(`${API_URL}/api/scheduler/agents`);
@@ -37,14 +37,5 @@ export const generateSchedule = async () => {
         return response.status === 204;
     } catch (error) {
         throw new Error('Error generating schedule');
-    }
-};
-
-export const calculateEfficiency = async () => {
-    try {
-        const response = await fetch(`${API_URL}/api/scheduler/calculate-efficiency`, { method: 'POST' });
-        return response.data;
-    } catch (error) {
-        throw new Error('Error calculating efficiency');
     }
 };
