@@ -1,7 +1,13 @@
 nelmio_cors:
     defaults:
         allow_credentials: true
-        allow_origin: '%env(csv:CORS_ALLOW_ORIGIN)%'
+        allow_origin:
+            - 'http://localhost'
+            - 'http://127.0.0.1'
+            - 'http://frontend.scheduler'
+            - 'https://frontend.scheduler'
+            - 'https://call-center.pythdev.pl'
+            - 'https://api-call-center.pythdev.pl'
         allow_headers: ['Content-Type', 'Authorization', 'X-Requested-With']
         allow_methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
         expose_headers: ['Link']
