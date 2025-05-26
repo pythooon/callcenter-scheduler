@@ -1,9 +1,8 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, TablePagination, styled, Typography, CircularProgress } from '@mui/material';
+import { Box, TablePagination, styled, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import './DataGridTable.css';
-import { fetchAgents } from '../../api'; // lub '../services/api' — popraw ścieżkę
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader': {
@@ -30,48 +29,36 @@ const generateColumns = (data) => {
         renderCell: (params) => {
             const value = params.value;
             if (value && typeof value === 'object') {
-                return value.name || value.city || value.score || JSON.stringify(value);
+                return (
+                    value.name ||
+                    value.title ||
+                    value.email ||
+                    value.city ||
+                    value.score ||
+                    JSON.stringify(value)
+                );
             }
             return value;
         },
     }));
 };
 
-const DataGridTable = () => {
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+const DataGridTable = ({ rows = [] }) => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
-    const columns = useMemo(() => generateColumns(data), [data]);
+    const columns = useMemo(() => generateColumns(rows), [rows]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const agents = await fetchAgents(); // <- lub fetchShifts() itd.
-                setData(agents);
-            } catch (err) {
-                setError('Failed to load data.');
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    const totalRows = data.length;
+    const totalRows = rows.length;
     const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
     const startIdx = paginationModel.page * paginationModel.pageSize;
     const endIdx = startIdx + paginationModel.pageSize;
-    const paginatedRows = data.slice(startIdx, endIdx);
+    const paginatedRows = rows.slice(startIdx, endIdx);
 
     useEffect(() => {
         if (paginationModel.page >= totalPages) {
             setPaginationModel((prev) => ({ ...prev, page: 0 }));
         }
-    }, [totalRows, paginationModel.pageSize, paginationModel.page, totalPages]);
+    }, [rows, paginationModel.pageSize, paginationModel.page, totalPages]);
 
     const handlePageChange = (event, newPage) => {
         setPaginationModel((prev) => ({ ...prev, page: newPage }));
@@ -94,15 +81,7 @@ const DataGridTable = () => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
-                {loading ? (
-                    <Box display="flex" justifyContent="center" mt={4}>
-                        <CircularProgress />
-                    </Box>
-                ) : error ? (
-                    <Typography variant="h6" color="error" align="center" mt={3}>
-                        {error}
-                    </Typography>
-                ) : totalRows === 0 ? (
+                {rows.length === 0 ? (
                     <Typography variant="h6" color="textSecondary" align="center" mt={3}>
                         No records
                     </Typography>
@@ -127,7 +106,7 @@ const DataGridTable = () => {
                 )}
             </motion.div>
 
-            {!loading && !error && totalRows > 0 && (
+            {rows.length > 0 && (
                 <Box display="flex" justifyContent="flex-end" mt={2}>
                     <TablePagination
                         component="div"
