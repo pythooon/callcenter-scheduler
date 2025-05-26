@@ -61,7 +61,7 @@ Diagram ilustrujący dwa główne etapy algorytmu grafikowania agentów Call Cen
             |
             v
 +-----------------------------+
-| Zapisz wygenerowane zmiany |
+| Zapisz wygenerowane zmiany  |
 +-----------------------------+
 ```
 
@@ -176,7 +176,7 @@ Zoptymalizowany grafik agentów na podstawie:
 1. Instalujemy docker i docker compose
 2. Odblokowujemy port 80
 3. Dodajemy api.scheduler i frontend.scheduler do /etc/hosts dla 127.0.0.1
-4. uruchamiamy skrypt ./run, wybieramy opcję nr 5 i to wszystko
+4. uruchamiamy skrypt ./run, wybieramy opcję nr 6 i to wszystko
 
 
 ### Po uruchomieniu skryptu ./run wyświetli się poniższe menu:
