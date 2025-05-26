@@ -1,4 +1,4 @@
-const API_URL = 'https://api.scheduler';
+const API_URL = process.env.API_URL;
 
 export const fetchAgents = async () => {
     const response = await fetch(`${API_URL}/api/scheduler/agents`);

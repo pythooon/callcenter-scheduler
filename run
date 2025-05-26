@@ -23,10 +23,23 @@ generate_ssl_certificates() {
     fi
 }
 
+get_app_env() {
+    if [[ -f .env ]]; then
+        export $(grep -v '^#' .env | xargs)
+        echo $APP_ENV
+    else
+        echo "Error: .env file not found!"
+        exit 1
+    fi
+}
+
 copy_nginx_config_files() {
-    echo "Copying Nginx config files from example to actual config..."
-    cp ./backend/nginx/api.conf.example ./backend/nginx/api.conf
-    cp ./backend/nginx/frontend.conf.example ./backend/nginx/frontend.conf
+    ENV=$(get_app_env)
+    echo 'test'
+    echo "Copying Nginx config files based on APP_ENV ($ENV)..."
+
+    cp ./backend/nginx/api.conf.$ENV.example ./backend/nginx/api.conf
+    cp ./backend/nginx/frontend.conf.$ENV.example ./backend/nginx/frontend.conf
 }
 
 show_menu() {
