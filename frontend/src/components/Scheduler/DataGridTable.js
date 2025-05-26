@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, TablePagination, styled, Typography } from '@mui/material';
+import { Box, TablePagination, styled, Typography, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
 import './DataGridTable.css';
+import { fetchAgents } from '../../api'; // lub '../services/api' — popraw ścieżkę
 
 const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     '& .MuiDataGrid-columnHeader': {
@@ -36,16 +37,35 @@ const generateColumns = (data) => {
     }));
 };
 
-const DataGridTable = ({ rows = [] }) => {
+const DataGridTable = () => {
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
-    const columns = useMemo(() => generateColumns(rows), [rows]);
 
-    const totalRows = rows.length;
+    const columns = useMemo(() => generateColumns(data), [data]);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const agents = await fetchAgents(); // <- lub fetchShifts() itd.
+                setData(agents);
+            } catch (err) {
+                setError('Failed to load data.');
+                console.error(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const totalRows = data.length;
     const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
-
     const startIdx = paginationModel.page * paginationModel.pageSize;
     const endIdx = startIdx + paginationModel.pageSize;
-    const paginatedRows = rows.slice(startIdx, endIdx);
+    const paginatedRows = data.slice(startIdx, endIdx);
 
     useEffect(() => {
         if (paginationModel.page >= totalPages) {
@@ -74,7 +94,15 @@ const DataGridTable = ({ rows = [] }) => {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.5, ease: 'easeInOut' }}
             >
-                {totalRows === 0 ? (
+                {loading ? (
+                    <Box display="flex" justifyContent="center" mt={4}>
+                        <CircularProgress />
+                    </Box>
+                ) : error ? (
+                    <Typography variant="h6" color="error" align="center" mt={3}>
+                        {error}
+                    </Typography>
+                ) : totalRows === 0 ? (
                     <Typography variant="h6" color="textSecondary" align="center" mt={3}>
                         No records
                     </Typography>
@@ -99,7 +127,7 @@ const DataGridTable = ({ rows = [] }) => {
                 )}
             </motion.div>
 
-            {totalRows > 0 && (
+            {!loading && !error && totalRows > 0 && (
                 <Box display="flex" justifyContent="flex-end" mt={2}>
                     <TablePagination
                         component="div"
@@ -112,7 +140,6 @@ const DataGridTable = ({ rows = [] }) => {
                         labelRowsPerPage="Records per page"
                         showFirstButton
                         showLastButton
-                        pageCount={totalPages}
                     />
                 </Box>
             )}

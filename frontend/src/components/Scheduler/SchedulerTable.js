@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton, Tooltip, Button } from '@mui/material';
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, IconButton, Tooltip, Button, Snackbar, Alert } from '@mui/material';
 import { styled } from '@mui/system';
 import { format, addDays, startOfWeek, subDays } from 'date-fns';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { fetchShifts } from '../../api';
+import { fetchShifts, generateSchedule } from '../../api';
 
 const StyledTableCell = styled(TableCell)(({ theme, isHighlighted, isToday }) => ({
     padding: '12px',
@@ -63,6 +63,10 @@ const SchedulerTable = () => {
         return weekDates;
     }, [currentDate]);
 
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState('');
+    const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
     const fetchScheduleData = async (startDate, endDate) => {
         setIsLoading(true);
         try {
@@ -83,6 +87,37 @@ const SchedulerTable = () => {
     const handleNextWeek = () => {
         const newDate = addDays(currentDate, 7);
         setCurrentDate(newDate);
+    };
+
+    const handleGenerateSchedule = async () => {
+        try {
+            setIsLoading(true);
+            const success = await generateSchedule();
+            if (success) {
+                const startOfWeekDate = format(startOfWeek(currentDate, { weekStartsOn: 1 }), 'yyyy-MM-dd');
+                const endOfWeekDate = format(addDays(startOfWeek(currentDate, { weekStartsOn: 1 }), 6), 'yyyy-MM-dd');
+                await fetchScheduleData(startOfWeekDate, endOfWeekDate);
+
+                setSnackbarMessage('Schedule generated successfully!');
+                setSnackbarSeverity('success');
+                setSnackbarOpen(true);
+            } else {
+                setSnackbarMessage('Failed to generate schedule.');
+                setSnackbarSeverity('error');
+                setSnackbarOpen(true);
+            }
+        } catch (error) {
+            console.error('Error generating schedule:', error);
+            setSnackbarMessage('An error occurred while generating schedule.');
+            setSnackbarSeverity('error');
+            setSnackbarOpen(true);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbarOpen(false);
     };
 
     useEffect(() => {
@@ -150,7 +185,7 @@ const SchedulerTable = () => {
         <Box sx={{ boxShadow: '0 4px 15px rgba(0, 0, 0, 0.1)', borderRadius: '8px', padding: '16px', marginBottom: '10px', width: '100%' }}>
             <Box sx={{ display: 'inline', width: '100%' }}>
                 <Box sx={{ display: 'inline', float: 'left', width: '20%' }}>
-                    <Button variant="contained" color="primary" fullWidth onClick={() => console.log('Generate Schedule')}>
+                    <Button variant="contained" color="primary" fullWidth onClick={handleGenerateSchedule}>
                         Generate Schedule
                     </Button>
                 </Box>
@@ -219,6 +254,16 @@ const SchedulerTable = () => {
                     </Table>
                 </TableContainer>
             )}
+            <Snackbar
+                open={snackbarOpen}
+                autoHideDuration={4000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+                    {snackbarMessage}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

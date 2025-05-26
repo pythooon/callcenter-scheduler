@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Box, CircularProgress, Snackbar } from '@mui/material';
 import { motion } from 'framer-motion';
-import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts, generateSchedule } from '../../api';
+import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts} from '../../api';
 import DataGridTable from './DataGridTable';
 import SchedulerTable from './SchedulerTable';
 import TabsComponent from './TabsComponent';
@@ -18,10 +18,6 @@ const Scheduler = () => {
         shifts: null,
     });
     const [loading, setLoading] = useState(false);
-    const [generateLoading, setGenerateLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [openSnackbar, setOpenSnackbar] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
 
     const tabData = [
         { label: 'Agents', key: 'agents', fetchData: fetchAgents },
@@ -95,23 +91,6 @@ const Scheduler = () => {
         return <DataGridTable rows={selectedData || []} />;
     };
 
-    const handleGenerateSchedule = async () => {
-        setGenerateLoading(true);
-        setErrorMessage('');
-        setSuccessMessage('');
-
-        try {
-            await generateSchedule();
-            setSuccessMessage('Schedule generated successfully!');
-            setOpenSnackbar(true);
-        } catch (error) {
-            setErrorMessage('Failed to generate schedule');
-            setOpenSnackbar(true);
-        } finally {
-            setGenerateLoading(false);
-        }
-    };
-
     return (
         <div className="scheduler">
             <BackgroundContainer />
@@ -131,13 +110,6 @@ const Scheduler = () => {
                     </Box>
                 </MainContent>
             </Container>
-
-            <Snackbar
-                open={openSnackbar}
-                autoHideDuration={6000}
-                onClose={() => setOpenSnackbar(false)}
-                message={successMessage || errorMessage}
-            />
         </div>
     );
 };
