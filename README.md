@@ -168,3 +168,28 @@ Zoptymalizowany grafik agentów na podstawie:
     - Sprawdź limity (godzinowe i dzienne).
     - Przypisz agentów aż do pokrycia zapotrzebowania.
 3. Zapisz grafik.
+
+---
+
+### Kroki instalacji:
+
+1. Instalujemy docker i docker compose
+2. Odblokowujemy port 80
+3. Dodajemy api.scheduler i frontend.scheduler do /etc/hosts dla 127.0.0.1
+4. uruchamiamy skrypt ./run, wybieramy opcję nr 5 i to wszystko
+
+---------------------------------------------
+🐳 Menu zarządzania kontenerami Docker Compose
+---------------------------------------------
+1) Zbuduj wszystkie serwisy
+2) Restartuj wszystkie serwisy
+3) Wymuś przebudowę i restart
+4) Zbuduj i restartuj konkretny serwis
+5) Zbuduj wszystkie i restartuj
+6) Uruchom wszystkie serwisy
+7) Podgląd logów wszystkich serwisów
+8) Podgląd logów konkretnego serwisu
+9) Sprawdź status serwisów
+10) Zatrzymaj i usuń wszystkie serwisy
+11) Wyjście
+---------------------------------------------
