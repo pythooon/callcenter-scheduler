@@ -1,5 +1,5 @@
 parameters:
-
+    cors_allow_origin_string: '%env(string:CORS_ALLOW_ORIGIN)%'
 services:
     _defaults:
         autowire: true
@@ -26,3 +26,4 @@ services:
             $facade: '@App\Scheduler\Application\SchedulerFacade'
         tags:
             - { name: 'messenger.message_handler', bus: 'scheduler_bus' }
+    cors_allow_origin_array: '@=parameter("cors_allow_origin_string").split(",")'
