@@ -137,6 +137,9 @@
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/sebastian/version" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/phpunit-bridge" />
       <excludeFolder url="file://$MODULE_DIR$/backend/vendor/theseer/tokenizer" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/monolog/monolog" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/monolog-bridge" />
+      <excludeFolder url="file://$MODULE_DIR$/backend/vendor/symfony/monolog-bundle" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

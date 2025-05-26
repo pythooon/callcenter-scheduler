@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Scheduler\Application\Contract;
 
 use App\Common\Contract\Arrayable;
+use DateTimeInterface;
 use Symfony\Component\Uid\Uuid;
 
 interface EfficiencyReadContract extends Arrayable
@@ -28,8 +29,14 @@ interface EfficiencyReadContract extends Arrayable
      *         id: string,
      *         name: string
      *     },
-     *     score: float
+     *     score: float,
+     *     start: string,
+     *     end: string
      * }
      */
     public function toArray(): array;
+
+    public function getStart(): DateTimeInterface;
+
+    public function getEnd(): DateTimeInterface;
 }

@@ -10,6 +10,7 @@ use App\Scheduler\Domain\Entity\Queue;
 use App\Scheduler\Domain\Mapper\EfficiencyMapper;
 use App\Scheduler\Application\Contract\EfficiencyReadContract;
 use App\Scheduler\Application\Contract\EfficiencyListContract;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
@@ -28,6 +29,8 @@ class EfficiencyMapperTest extends TestCase
         $efficiency->setAgent($agent);
         $efficiency->setQueue($queue);
         $efficiency->setScore(90.5);
+        $efficiency->setStart(new DateTime('2025-04-25 17:00:00'));
+        $efficiency->setEnd(new DateTime('2025-05-25 17:00:00'));
 
         $efficiencyReadContract = EfficiencyMapper::mapEntityToReadContract($efficiency);
 
@@ -41,6 +44,8 @@ class EfficiencyMapperTest extends TestCase
         $efficiency1 = new Efficiency();
         $efficiency1->setId(Uuid::v4());
         $efficiency1->setScore(80.5);
+        $efficiency1->setStart(new DateTime('2025-04-25 17:00:00'));
+        $efficiency1->setEnd(new DateTime('2025-05-25 17:00:00'));
         $queue1 = new Queue();
         $queue1->setId(Uuid::v4());
         $queue1->setName('Queue 1');
@@ -53,6 +58,8 @@ class EfficiencyMapperTest extends TestCase
         $efficiency2 = new Efficiency();
         $efficiency2->setId(Uuid::v4());
         $efficiency2->setScore(95.5);
+        $efficiency2->setStart(new DateTime('2025-04-25 17:00:00'));
+        $efficiency2->setEnd(new DateTime('2025-05-25 17:00:00'));
         $queue2 = new Queue();
         $queue2->setId(Uuid::v4());
         $queue2->setName('Queue 2');

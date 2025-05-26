@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250523090425 extends AbstractMigration
+final class Version20250526132751 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -30,7 +30,7 @@ final class Version20250523090425 extends AbstractMigration
             CREATE TABLE call_history (id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', agent_id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', queue_id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', date DATETIME NOT NULL, calls_count INT NOT NULL, INDEX IDX_F21FE97E3414710B (agent_id), INDEX IDX_F21FE97E477B5BAE (queue_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
-            CREATE TABLE efficiency (id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', agent_id BINARY(16) DEFAULT NULL COMMENT '(DC2Type:uuid)', queue_id BINARY(16) DEFAULT NULL COMMENT '(DC2Type:uuid)', score DOUBLE PRECISION NOT NULL, INDEX IDX_C06D87493414710B (agent_id), INDEX IDX_C06D8749477B5BAE (queue_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB
+            CREATE TABLE efficiency (id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', agent_id BINARY(16) DEFAULT NULL COMMENT '(DC2Type:uuid)', queue_id BINARY(16) DEFAULT NULL COMMENT '(DC2Type:uuid)', start DATETIME NOT NULL, end DATETIME NOT NULL, score DOUBLE PRECISION NOT NULL, INDEX IDX_C06D87493414710B (agent_id), INDEX IDX_C06D8749477B5BAE (queue_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB
         SQL);
         $this->addSql(<<<'SQL'
             CREATE TABLE predictions (id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', queue_id BINARY(16) NOT NULL COMMENT '(DC2Type:uuid)', date DATE NOT NULL, time TIME NOT NULL, occupancy INT NOT NULL, INDEX IDX_8E87BCE6477B5BAE (queue_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE `utf8_unicode_ci` ENGINE = InnoDB

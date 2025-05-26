@@ -4,52 +4,75 @@ declare(strict_types=1);
 
 namespace App\Tests\Scheduler\Domain\Repository;
 
-use App\Scheduler\Application\Repository\AgentEntityRepository;
 use App\Scheduler\Domain\Entity\Agent;
-use App\Scheduler\Domain\Mapper\AgentMapper;
+use App\Scheduler\Domain\Model\AgentList;
+use App\Scheduler\Domain\Model\AgentRead;
+use App\Scheduler\Domain\Model\QueueList;
 use App\Scheduler\Domain\Repository\AgentRepositoryImpl;
+use App\Scheduler\Application\Contract\AgentListContract;
+use App\Scheduler\Application\Repository\AgentEntityRepository;
+use App\Scheduler\Domain\Mapper\AgentMapper;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Uid\UuidV4;
 
-class AgentRepositoryImplTest extends TestCase
+final class AgentRepositoryImplTest extends TestCase
 {
-    private AgentEntityRepository $entityRepository;
+    private AgentEntityRepository $entityRepositoryMock;
     private AgentMapper $mapper;
+    private AgentListContract $agentList;
     private AgentRepositoryImpl $repository;
+    private UuidV4 $agentId;
+    private string $name;
+    private AgentRead $agentRead;
 
     protected function setUp(): void
     {
-        $this->entityRepository = $this->createMock(AgentEntityRepository::class);
+        $this->entityRepositoryMock = $this->createMock(AgentEntityRepository::class);
         $this->mapper = new AgentMapper();
-        $this->repository = new AgentRepositoryImpl($this->entityRepository, $this->mapper);
+        $this->agentId = Uuid::v4();
+        $this->name = 'Test Agent';
+        $this->agentRead = new AgentRead($this->agentId, $this->name, new QueueList());
+        $this->agentList = new AgentList();
+        $this->agentList->addItem($this->agentRead);
+
+        $this->repository = new AgentRepositoryImpl($this->entityRepositoryMock, $this->mapper);
     }
 
-    public function testFindAll(): void
+    public function testFindAllReturnsAgentListContract(): void
     {
-        $agentData = [];
+        $agentEntity = new Agent();
+        $agentEntity->setId($this->agentId);
+        $agentEntity->setName($this->name);
 
-        $agentOne = new Agent();
-        $agentOne->setId(Uuid::v4());
-        $agentOne->setName('Agent One');
+        $agentsArray = [$agentEntity];
 
-        $agentTwo = new Agent();
-        $agentTwo->setId(Uuid::v4());
-        $agentTwo->setName('Agent Two');
-
-        $agentThree = new Agent();
-        $agentThree->setId(Uuid::v4());
-        $agentThree->setName('Agent Three');
-
-        $agentData = [$agentOne, $agentTwo, $agentThree];
-
-        $this->entityRepository
+        $this->entityRepositoryMock
+            ->expects($this->once())
             ->method('findAll')
-            ->willReturn($agentData);
-
-        $mappedAgentList = $this->mapper->mapArrayToListContract($agentData);
+            ->willReturn($agentsArray);
 
         $result = $this->repository->findAll();
 
-        $this->assertEquals($mappedAgentList, $result);
+        $this->assertEquals($this->agentList, $result);
+    }
+
+    public function testFindByIdsReturnsAgentListContract(): void
+    {
+        $agentEntity = new Agent();
+        $agentEntity->setId($this->agentId);
+        $agentEntity->setName($this->name);
+
+        $agentsArray = [$agentEntity];
+
+        $this->entityRepositoryMock
+            ->expects($this->once())
+            ->method('findByIds')
+            ->with([])
+            ->willReturn($agentsArray);
+
+        $result = $this->repository->findByIds([]);
+
+        $this->assertEquals($this->agentList, $result);
     }
 }

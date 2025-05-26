@@ -8,6 +8,7 @@ use App\Scheduler\Application\Contract\AgentListContract;
 use App\Scheduler\Application\Repository\AgentEntityRepository;
 use App\Scheduler\Application\Repository\AgentRepository;
 use App\Scheduler\Domain\Mapper\AgentMapper;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class AgentRepositoryImpl implements AgentRepository
 {
@@ -20,5 +21,13 @@ final readonly class AgentRepositoryImpl implements AgentRepository
     public function findAll(): AgentListContract
     {
         return $this->mapper::mapArrayToListContract($this->entityRepository->findAll());
+    }
+
+    /**
+     * @param list<Uuid> $ids
+     */
+    public function findByIds(array $ids = []): AgentListContract
+    {
+        return $this->mapper::mapArrayToListContract($this->entityRepository->findByIds($ids));
     }
 }

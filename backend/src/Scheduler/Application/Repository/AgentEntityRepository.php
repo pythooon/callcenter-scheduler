@@ -15,4 +15,10 @@ interface AgentEntityRepository
     public function findAll(): array;
 
     public function findOrFail(Uuid $id): Agent;
+
+    /**
+     * @param list<Uuid> $ids
+     * @return list<Agent>
+     */
+    public function findByIds(array $ids = []): array;
 }

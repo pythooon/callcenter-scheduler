@@ -12,6 +12,7 @@ use App\Scheduler\Domain\Model\EfficiencyRead;
 use App\Scheduler\Domain\Model\QueueList;
 use App\Scheduler\Domain\Model\QueueRead;
 use App\Scheduler\Domain\UseCase\Efficiencies\Efficiencies;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
@@ -34,7 +35,14 @@ class EfficienciesTest extends TestCase
         $queueList = new QueueList();
         $queueList->addItem($queueRead);
         $agentRead = new AgentRead(Uuid::v4(), 'Agent 1', $queueList);
-        $efficiency = new EfficiencyRead($id, $agentRead, $queueRead, $score);
+        $efficiency = new EfficiencyRead(
+            $id,
+            $agentRead,
+            $queueRead,
+            $score,
+            new DateTime('2025-04-25 17:00:00'),
+            new DateTime('2025-05-25 17:00:00')
+        );
         $efficiencyList = new EfficiencyList();
         $efficiencyList->addItem($efficiency);
 

@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Scheduler\Domain\UseCase\ScheduleGenerate;
 
-use App\Scheduler\Application\Contract\ShiftCreateContract;
 use App\Scheduler\Application\Repository\EfficiencyRepository;
 use App\Scheduler\Application\Repository\PredictionRepository;
 use App\Scheduler\Application\Repository\ShiftRepository;
-use App\Scheduler\Domain\Mapper\ShiftMapper;
 use App\Scheduler\Domain\Model\AgentRead;
 use App\Scheduler\Domain\Model\EfficiencyList;
 use App\Scheduler\Domain\Model\EfficiencyRead;
@@ -17,117 +15,94 @@ use App\Scheduler\Domain\Model\PredictionRead;
 use App\Scheduler\Domain\Model\QueueList;
 use App\Scheduler\Domain\Model\QueueRead;
 use App\Scheduler\Domain\UseCase\ScheduleGenerate\ScheduleGenerate;
-use PHPUnit\Framework\MockObject\MockObject;
+use App\Scheduler\Domain\Mapper\ShiftMapper;
+use DateTime;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
 class ScheduleGenerateTest extends TestCase
 {
-    private MockObject|EfficiencyRepository $efficiencyRepository;
-    private MockObject|PredictionRepository $predictionRepository;
-    private MockObject|ShiftRepository $shiftRepository;
-    private ShiftMapper $shiftMapper;
-    private ScheduleGenerate $scheduleGenerate;
+    private EfficiencyRepository $efficiencyRepository;
+    private PredictionRepository $predictionRepository;
+    private ShiftRepository $shiftRepository;
+    private ScheduleGenerate $useCase;
 
     protected function setUp(): void
     {
         $this->efficiencyRepository = $this->createMock(EfficiencyRepository::class);
         $this->predictionRepository = $this->createMock(PredictionRepository::class);
         $this->shiftRepository = $this->createMock(ShiftRepository::class);
-        $this->shiftMapper = new ShiftMapper();
 
-        $this->scheduleGenerate = new ScheduleGenerate(
+        $this->useCase = new ScheduleGenerate(
             $this->efficiencyRepository,
             $this->predictionRepository,
             $this->shiftRepository,
-            $this->shiftMapper
+            new ShiftMapper()
         );
     }
 
-    public function testCreateWeeklySchedule(): void
+    public function testCreateWeeklyScheduleGeneratesValidShifts(): void
     {
-        $queueRead = new QueueRead(Uuid::v4(), 'Queue 1');
+        $queue = new QueueRead(Uuid::v4(), 'Queue 1');
         $queueList = new QueueList();
-        $queueList->addItem($queueRead);
-        $agentRead = new AgentRead(Uuid::v4(), 'Agent 1', $queueList);
+        $queueList->addItem($queue);
 
-
-        $efficiencyRead = new EfficiencyRead(Uuid::v4(), $agentRead, $queueRead, 95.5);
+        $agent1 = new AgentRead(Uuid::v4(), 'Agent One', $queueList);
+        $agent2 = new AgentRead(Uuid::v4(), 'Agent Two', $queueList);
 
         $efficiencyList = new EfficiencyList();
-        $efficiencyList->addItem($efficiencyRead);
-
-        $predictionRead = new PredictionRead(
+        $efficiencyList->addItem(new EfficiencyRead(
             Uuid::v4(),
-            $queueRead,
-            new \DateTime('2025-01-01'),
-            new \DateTime('2025-01-01 15:00'),
-            40
-        );
-
-        $predictionList = new PredictionList();
-        $predictionList->addItem($predictionRead);
+            $agent1,
+            $queue,
+            8.5,
+            new DateTime('2024-01-01'),
+            new DateTime('2024-01-07')
+        ));
+        $efficiencyList->addItem(new EfficiencyRead(
+            Uuid::v4(),
+            $agent2,
+            $queue,
+            7.0,
+            new DateTime('2024-01-01'),
+            new DateTime('2024-01-07')
+        ));
 
         $this->efficiencyRepository
-            ->expects($this->once())
             ->method('findAll')
             ->willReturn($efficiencyList);
 
+        $predictionList = new PredictionList();
+        $predictionDate = new DateTime('2024-01-02');
+        $predictionTime = new DateTime('2024-01-02 10:00:00');
+
+        $prediction = new PredictionRead(
+            Uuid::v4(),
+            $queue,
+            $predictionDate,
+            $predictionTime,
+            10
+        );
+
+        $predictionList->addItem($prediction);
+
         $this->predictionRepository
-            ->expects($this->once())
             ->method('findAll')
             ->willReturn($predictionList);
 
         $this->shiftRepository
-            ->expects($this->exactly(1))
-            ->method('upsert')
-            ->with($this->isInstanceOf(ShiftCreateContract::class));
+            ->expects($this->atLeastOnce())
+            ->method('upsert');
 
-        $schedule = $this->scheduleGenerate->createWeeklySchedule();
+        $shifts = $this->useCase->createWeeklySchedule();
 
-        $this->assertNotEmpty($schedule);
-    }
+        $this->assertNotEmpty($shifts);
+        $this->assertCount(2, $shifts);
 
-    public function testGenerateScheduleWithMockedData(): void
-    {
-        $queueRead = new QueueRead(Uuid::v4(), 'Queue 1');
-        $queueList = new QueueList();
-        $queueList->addItem($queueRead);
-        $agentRead = new AgentRead(Uuid::v4(), 'Agent 1', $queueList);
-
-
-        $efficiencyRead = new EfficiencyRead(Uuid::v4(), $agentRead, $queueRead, 95.5);
-
-        $efficiencyList = new EfficiencyList();
-        $efficiencyList->addItem($efficiencyRead);
-
-        $predictionRead = new PredictionRead(
-            Uuid::v4(),
-            $queueRead,
-            new \DateTime('2025-01-01'),
-            new \DateTime('2025-01-01 15:00'),
-            40
-        );
-
-        $predictionList = new PredictionList();
-        $predictionList->addItem($predictionRead);
-        $this->efficiencyRepository
-            ->expects($this->once())
-            ->method('findAll')
-            ->willReturn($efficiencyList);
-
-        $this->predictionRepository
-            ->expects($this->once())
-            ->method('findAll')
-            ->willReturn($predictionList);
-
-        $this->shiftRepository
-            ->expects($this->exactly(1))
-            ->method('upsert')
-            ->with($this->isInstanceOf(ShiftCreateContract::class));
-
-        $schedule = $this->scheduleGenerate->createWeeklySchedule();
-
-        $this->assertNotEmpty($schedule);
+        foreach ($shifts as $shift) {
+            $this->assertSame($queue, $shift->getQueue());
+            $this->assertEquals(new DateTime($predictionDate->format('Y-m-d') . ' '. $predictionTime->format('H:i')), $shift->getStart());
+            $this->assertContains($shift->getAgent()->getName(), ['Agent One', 'Agent Two']);
+        }
     }
 }

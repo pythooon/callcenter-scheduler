@@ -58,7 +58,7 @@ final readonly class ScheduleGenerate
         foreach ($predictionList->getItems() as $prediction) {
             foreach ($this->findBestAgentsPrediction($efficiencyList, $prediction) as $agent) {
                 $agentId = (string)$agent->getId();
-                $currentDailyHours = $agentDailyWorkHours[$agentId][$prediction->getDate()->format('Y-m-d')] ?? 0;
+                $currentDailyHours = $agentDailyWorkHours[$agentId][$prediction->getDate()->format('Y-m-d H:00')] ?? 0;
 
                 if ($currentDailyHours >= self::MAX_WORK_HOURS_PER_DAY) {
                     continue;

@@ -8,6 +8,8 @@ use App\Scheduler\Application\Contract\QueueListContract;
 use App\Scheduler\Domain\Model\AgentList;
 use App\Scheduler\Domain\Model\AgentRead;
 use App\Scheduler\Application\Contract\AgentReadContract;
+use App\Scheduler\Domain\Model\QueueList;
+use App\Scheduler\Domain\Model\QueueRead;
 use Symfony\Component\Uid\Uuid;
 use PHPUnit\Framework\TestCase;
 
@@ -22,9 +24,12 @@ class AgentListTest extends TestCase
 
     public function testAddItem(): void
     {
+        $queueRead = new QueueRead(Uuid::v4(), 'Queue 1');
         $uuid = Uuid::v4();
         $name = 'Test Agent';
-        $agentRead = $this->createMock(AgentReadContract::class);
+        $queueList = new QueueList();
+        $queueList->addItem($queueRead);
+        $agentRead = new AgentRead($uuid, $name, $queueList);
 
         $this->agentList->addItem($agentRead);
 

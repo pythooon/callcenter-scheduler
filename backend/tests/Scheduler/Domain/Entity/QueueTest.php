@@ -2,60 +2,69 @@
 
 declare(strict_types=1);
 
-namespace App\Scheduler\Domain\Entity;
+namespace App\Tests\Scheduler\Domain\Entity;
 
-use App\Scheduler\Infrastructure\Repository\QueueEntityRepositoryImpl;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
+use App\Scheduler\Domain\Entity\Queue;
+use App\Scheduler\Domain\Entity\Shift;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity(repositoryClass: QueueEntityRepositoryImpl::class)]
-class Queue
+class QueueTest extends TestCase
 {
-    #[ORM\Id, ORM\Column(type: 'uuid'), ORM\GeneratedValue(strategy: 'NONE')]
-    private Uuid $id;
+    private Queue $queue;
 
-    #[ORM\Column(length: 100)]
-    private string $name;
-
-    #[ORM\OneToMany(targetEntity: Shift::class, mappedBy: 'queue')]
-    private Collection $shifts;
-
-    public function __construct()
+    protected function setUp(): void
     {
-        $this->shifts = new ArrayCollection();
+        $this->queue = new Queue();
+        $this->queue->setId(Uuid::v4());
+        $this->queue->setName('Support Queue');
     }
 
-    public function getId(): Uuid
+    public function testGetId(): void
     {
-        return $this->id;
+        $this->assertInstanceOf(Uuid::class, $this->queue->getId());
     }
 
-    public function setId(Uuid $id): void
+    public function testSetId(): void
     {
-        $this->id = $id;
+        $newId = Uuid::v4();
+        $this->queue->setId($newId);
+        $this->assertSame($newId, $this->queue->getId());
     }
 
-    public function getName(): string
+    public function testGetName(): void
     {
-        return $this->name;
+        $this->assertEquals('Support Queue', $this->queue->getName());
     }
 
-    public function setName(string $name): void
+    public function testSetName(): void
     {
-        $this->name = $name;
+        $this->queue->setName('Sales Queue');
+        $this->assertEquals('Sales Queue', $this->queue->getName());
     }
 
-    public function getShifts(): Collection
+    public function testGetShiftsInitiallyEmpty(): void
     {
-        return $this->shifts;
+        $this->assertCount(0, $this->queue->getShifts());
     }
 
-    public function addShift(Shift $shift): void
+    public function testAddShift(): void
     {
-        if (!$this->shifts->contains($shift)) {
-            $this->shifts[] = $shift;
-        }
+        $shift = $this->createMock(Shift::class);
+
+        $this->queue->addShift($shift);
+
+        $this->assertCount(1, $this->queue->getShifts());
+        $this->assertTrue($this->queue->getShifts()->contains($shift));
+    }
+
+    public function testAddShiftOnlyOnce(): void
+    {
+        $shift = $this->createMock(Shift::class);
+
+        $this->queue->addShift($shift);
+        $this->queue->addShift($shift);
+
+        $this->assertCount(1, $this->queue->getShifts());
     }
 }

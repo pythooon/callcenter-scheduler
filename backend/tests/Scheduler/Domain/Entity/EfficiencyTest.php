@@ -22,7 +22,9 @@ class EfficiencyTest extends TestCase
         $this->agent->setId(Uuid::v4());
         $this->agent->setName('Test Agent');
 
-        $this->queue = new Queue(Uuid::v4(), 'Test Queue');
+        $this->queue = new Queue();
+        $this->queue->setId(Uuid::v4());
+        $this->queue->setName('Test Queue');
 
         $this->efficiency = new Efficiency();
         $this->efficiency->setId(Uuid::v4());
@@ -63,7 +65,9 @@ class EfficiencyTest extends TestCase
 
     public function testSetQueue(): void
     {
-        $newQueue = new Queue(Uuid::v4(), 'New Queue');
+        $newQueue = new Queue();
+        $newQueue->setId(Uuid::v4());
+        $newQueue->setName('New Queue');
         $this->efficiency->setQueue($newQueue);
         $this->assertSame($newQueue, $this->efficiency->getQueue());
     }

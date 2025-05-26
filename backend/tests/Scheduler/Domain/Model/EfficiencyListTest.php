@@ -20,6 +20,8 @@ class EfficiencyListTest extends TestCase
     private AgentRead $agentRead;
     private QueueRead $queueRead;
     private EfficiencyRead $efficiencyRead;
+    private DateTime $start;
+    private DateTime $end;
 
     protected function setUp(): void
     {
@@ -30,12 +32,15 @@ class EfficiencyListTest extends TestCase
         $queueList = new QueueList();
         $queueList->addItem($this->queueRead);
         $this->agentRead = new AgentRead($this->uuid, 'Test Agent', $queueList);
-
+        $this->start = new DateTime('2025-04-25 17:00:00');
+        $this->end = new DateTime('2025-05-25 17:00:00');
         $this->efficiencyRead = new EfficiencyRead(
             $this->uuid,
             $this->agentRead,
             $this->queueRead,
-            95.5
+            95.5,
+            $this->start,
+            $this->end
         );
     }
 
@@ -69,6 +74,8 @@ class EfficiencyListTest extends TestCase
         $this->assertArrayHasKey('agent', $result[0]);
         $this->assertArrayHasKey('queue', $result[0]);
         $this->assertArrayHasKey('score', $result[0]);
+        $this->assertArrayHasKey('start', $result[0]);
+        $this->assertArrayHasKey('end', $result[0]);
         $this->assertIsArray($result[0]['agent']);
         $this->assertIsArray($result[0]['queue']);
     }

@@ -57,44 +57,6 @@ final class AgentRead implements AgentReadContract
         )[0]->getScore();
     }
 
-    public function calculateEfficiency(CallHistoryListContract $callHistoryListContract): void
-    {
-        $callsPerQueueAndDay = [];
-
-        foreach ($callHistoryListContract->getItems() as $callHistory) {
-            $date = $callHistory->getDate();
-
-            $queueId = (string)$callHistory->getQueue()->getId();
-            $dayKey = $date->format('Y-m-d');
-
-            if (!isset($callsPerQueueAndDay[$queueId])) {
-                $callsPerQueueAndDay[$queueId] = [];
-            }
-
-            $callsPerQueueAndDay[$queueId][$dayKey] = ($callsPerQueueAndDay[$queueId][$dayKey] ?? 0) +
-                $callHistory->getCallsCount();
-        }
-
-        $this->efficiencyListContract = new EfficiencyList();
-
-        foreach ($this->queues->getItems() as $queue) {
-            $queueIdStr = (string)$queue->getId();
-
-            $callsPerDay = $callsPerQueueAndDay[$queueIdStr] ?? [];
-
-            $score = count($callsPerDay) > 0 ? round(array_sum($callsPerDay) / count($callsPerDay), 2) : 0.0;
-
-            $this->efficiencyListContract->addItem(
-                new EfficiencyRead(
-                    Uuid::v4(),
-                    $this,
-                    $queue,
-                    $score
-                )
-            );
-        }
-    }
-
     /**
      * @return array{
      *     id: string,

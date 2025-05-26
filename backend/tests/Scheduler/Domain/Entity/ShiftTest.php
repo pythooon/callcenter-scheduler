@@ -2,77 +2,96 @@
 
 declare(strict_types=1);
 
-namespace App\Scheduler\Domain\Entity;
+namespace App\Tests\Scheduler\Domain\Entity;
 
-use App\Scheduler\Infrastructure\Repository\ShiftEntityRepositoryImpl;
+use App\Scheduler\Domain\Entity\Shift;
+use App\Scheduler\Domain\Entity\Agent;
+use App\Scheduler\Domain\Entity\Queue;
+use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
-use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ShiftEntityRepositoryImpl::class)]
-class Shift
+class ShiftTest extends TestCase
 {
-    #[ORM\Id, ORM\Column(type: 'uuid'), ORM\GeneratedValue(strategy: 'NONE')]
-    private Uuid $id;
-
-    #[ORM\ManyToOne(targetEntity: Agent::class, cascade: ['persist'], inversedBy: 'shifts')]
+    private Shift $shift;
     private Agent $agent;
-
-    #[ORM\ManyToOne(targetEntity: Queue::class, cascade: ['persist'], inversedBy: 'queues')]
     private Queue $queue;
+    private \DateTime $start;
+    private \DateTime $end;
+    private Uuid $uuid;
 
-    #[ORM\Column(type: "datetime")]
-    private \DateTimeInterface $start;
-
-    #[ORM\Column(type: "datetime")]
-    private \DateTimeInterface $end;
-
-    public function getId(): Uuid
+    protected function setUp(): void
     {
-        return $this->id;
+        $this->shift = new Shift();
+        $this->agent = $this->createMock(Agent::class);
+        $this->queue = $this->createMock(Queue::class);
+        $this->start = new \DateTime('2025-05-26 09:00:00');
+        $this->end = new \DateTime('2025-05-26 17:00:00');
+        $this->uuid = Uuid::v4();
+
+        $this->shift->setId($this->uuid);
+        $this->shift->setAgent($this->agent);
+        $this->shift->setQueue($this->queue);
+        $this->shift->setStart($this->start);
+        $this->shift->setEnd($this->end);
     }
 
-    public function setId(Uuid $id): void
+    public function testGetId(): void
     {
-        $this->id = $id;
+        $this->assertEquals($this->uuid, $this->shift->getId());
     }
 
-    public function getAgent(): Agent
+    public function testSetId(): void
     {
-        return $this->agent;
+        $newId = Uuid::v4();
+        $this->shift->setId($newId);
+        $this->assertEquals($newId, $this->shift->getId());
     }
 
-    public function setAgent(Agent $agent): void
+    public function testGetAgent(): void
     {
-        $this->agent = $agent;
+        $this->assertSame($this->agent, $this->shift->getAgent());
     }
 
-    public function getQueue(): Queue
+    public function testSetAgent(): void
     {
-        return $this->queue;
+        $newAgent = $this->createMock(Agent::class);
+        $this->shift->setAgent($newAgent);
+        $this->assertSame($newAgent, $this->shift->getAgent());
     }
 
-    public function setQueue(Queue $queue): void
+    public function testGetQueue(): void
     {
-        $this->queue = $queue;
+        $this->assertSame($this->queue, $this->shift->getQueue());
     }
 
-    public function getStart(): \DateTimeInterface
+    public function testSetQueue(): void
     {
-        return $this->start;
+        $newQueue = $this->createMock(Queue::class);
+        $this->shift->setQueue($newQueue);
+        $this->assertSame($newQueue, $this->shift->getQueue());
     }
 
-    public function setStart(\DateTimeInterface $start): void
+    public function testGetStart(): void
     {
-        $this->start = $start;
+        $this->assertEquals($this->start, $this->shift->getStart());
     }
 
-    public function getEnd(): \DateTimeInterface
+    public function testSetStart(): void
     {
-        return $this->end;
+        $newStart = new \DateTime('2025-05-27 08:00:00');
+        $this->shift->setStart($newStart);
+        $this->assertEquals($newStart, $this->shift->getStart());
     }
 
-    public function setEnd(\DateTimeInterface $end): void
+    public function testGetEnd(): void
     {
-        $this->end = $end;
+        $this->assertEquals($this->end, $this->shift->getEnd());
+    }
+
+    public function testSetEnd(): void
+    {
+        $newEnd = new \DateTime('2025-05-27 16:00:00');
+        $this->shift->setEnd($newEnd);
+        $this->assertEquals($newEnd, $this->shift->getEnd());
     }
 }

@@ -20,6 +20,12 @@ class Efficiency
     #[ORM\ManyToOne(targetEntity: Queue::class, cascade: ['persist'])]
     private Queue $queue;
 
+    #[ORM\Column(type: "datetime")]
+    private \DateTimeInterface $start;
+
+    #[ORM\Column(type: "datetime")]
+    private \DateTimeInterface $end;
+
     #[ORM\Column(type: "float")]
     private float $score;
 
@@ -61,5 +67,25 @@ class Efficiency
     public function setId(Uuid $id): void
     {
         $this->id = $id;
+    }
+
+    public function getStart(): \DateTimeInterface
+    {
+        return $this->start;
+    }
+
+    public function setStart(\DateTimeInterface $start): void
+    {
+        $this->start = $start;
+    }
+
+    public function getEnd(): \DateTimeInterface
+    {
+        return $this->end;
+    }
+
+    public function setEnd(\DateTimeInterface $end): void
+    {
+        $this->end = $end;
     }
 }

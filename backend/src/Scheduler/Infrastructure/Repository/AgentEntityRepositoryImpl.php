@@ -31,4 +31,19 @@ class AgentEntityRepositoryImpl extends ServiceEntityRepository implements Agent
 
         return $agent;
     }
+
+    /**
+     * @param list<Uuid> $ids
+     * @return list<Agent>
+     */
+    public function findByIds(array $ids = []): array
+    {
+        $agents = $this->findByIds($ids);
+
+        if (count($agents) !== count($ids)) {
+            throw new EntityNotFoundException('Some agents were not found.');
+        }
+
+        return $agents;
+    }
 }

@@ -35,7 +35,9 @@ final readonly class EfficiencyMapper
             id: $efficiency->getId(),
             agent: $agentReadContract,
             queue: $queueReadContract,
-            score: $efficiency->getScore()
+            score: $efficiency->getScore(),
+            start: $efficiency->getStart(),
+            end: $efficiency->getEnd()
         );
     }
 
@@ -45,7 +47,9 @@ final readonly class EfficiencyMapper
             id: $contract->getId(),
             agent: $contract->getAgent(),
             queue: $contract->getQueue(),
-            score: $contract->getScore()
+            score: $contract->getScore(),
+            start: $contract->getStart(),
+            end: $contract->getEnd()
         );
     }
 
@@ -59,6 +63,8 @@ final readonly class EfficiencyMapper
         $efficiency->setAgent($agentEntity);
         $efficiency->setQueue($queueEntity);
         $efficiency->setScore($contract->getScore());
+        $efficiency->setStart($contract->getStart());
+        $efficiency->setEnd($contract->getEnd());
 
         return $efficiency;
     }

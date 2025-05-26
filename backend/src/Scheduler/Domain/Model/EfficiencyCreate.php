@@ -7,6 +7,7 @@ namespace App\Scheduler\Domain\Model;
 use App\Scheduler\Application\Contract\AgentReadContract;
 use App\Scheduler\Application\Contract\EfficiencyCreateContract;
 use App\Scheduler\Application\Contract\QueueReadContract;
+use DateTimeInterface;
 use Symfony\Component\Uid\Uuid;
 
 class EfficiencyCreate implements EfficiencyCreateContract
@@ -15,8 +16,30 @@ class EfficiencyCreate implements EfficiencyCreateContract
         private Uuid $id,
         private AgentReadContract $agent,
         private QueueReadContract $queue,
-        private float $score
+        private float $score,
+        private DateTimeInterface $start,
+        private DateTimeInterface $end,
     ) {
+    }
+
+    public function getStart(): DateTimeInterface
+    {
+        return $this->start;
+    }
+
+    public function setStart(DateTimeInterface $start): void
+    {
+        $this->start = $start;
+    }
+
+    public function getEnd(): DateTimeInterface
+    {
+        return $this->end;
+    }
+
+    public function setEnd(DateTimeInterface $end): void
+    {
+        $this->end = $end;
     }
 
     public function getId(): Uuid
