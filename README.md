@@ -1,10 +1,24 @@
-# 📊 Algorytm Grafikowania Call Center
+# 📊 Call Center Scheduler – Algorytm Grafikowania
 
-Diagram ilustrujący dwa główne etapy algorytmu grafikowania agentów Call Center.
+Rozwiązanie zadania rekrutacyjnego polegającego na optymalnym grafikowaniu agentów Call Center, na podstawie ich efektywności oraz zapotrzebowania.
 
 ---
 
-## 1. Obliczanie Efektywności
+## 🔁 Etapy algorytmu
+
+Cały proces podzielony został na dwa główne etapy:
+
+1. **Obliczanie efektywności agentów** (`CalculateEfficiency`)
+2. **Generowanie grafiku** (`ScheduleGenerate`)
+
+---
+
+## 1. 📈 Obliczanie efektywności agentów
+
+**Plik:** `CalculateEfficiency.php`  
+**Cel:** Wyliczenie średniej liczby połączeń obsługiwanych przez agenta na godzinę w ramach konkretnej kolejki.
+
+### Algorytm – ASCII diagram
 
 ```plaintext
 +--------------------------------+
@@ -32,9 +46,28 @@ Diagram ilustrujący dwa główne etapy algorytmu grafikowania agentów Call Cen
 +--------------------------------------+
 ```
 
+### Szczegóły działania:
+
+1. 📅 **Ustalenie okresu analizy:**
+   - Jeśli brak parametrów, analizowany jest okres od początku poprzedniego miesiąca do chwili obecnej.
+
+2. 👥 **Pobranie agentów:**
+   - Jeżeli `agentIds` są puste, pobierani są wszyscy agenci z repozytorium.
+
+3. 🔄 **Przetwarzanie danych:**
+   - Dla każdego agenta i jego historii połączeń:
+      - Obliczana jest liczba połączeń na godzinę dla każdej kolejki.
+      - Wyliczana jest średnia (`score`).
+      - Wynik zapisywany jest do bazy danych.
+
 ---
 
-## 2. Generowanie Tygodniowego Grafiku
+## 2. 🧠 Generowanie tygodniowego grafiku
+
+**Plik:** `ScheduleGenerate.php`  
+**Cel:** Przypisanie agentów do zmian, zgodnie z efektywnością i zapotrzebowaniem na daną godzinę i kolejkę.
+
+### Algorytm – ASCII diagram
 
 ```plaintext
 +--------------------------------+
@@ -65,122 +98,64 @@ Diagram ilustrujący dwa główne etapy algorytmu grafikowania agentów Call Cen
 +-----------------------------+
 ```
 
----
+### Szczegóły działania:
 
-# 🧠 Algorytm grafikowania Call Center – Call Center Recruitment Task
+1. 📥 **Pobranie danych wejściowych:**
+   - Wszystkie obliczone efektywności.
+   - Predykcje zapotrzebowania (`Prediction`).
 
-## 🔁 Etapy procesu
+2. 📊 **Przetwarzanie predykcji:**
+   - Dla każdej godziny i kolejki:
+      - Pobierani są agenci przypisani do tej kolejki.
+      - Sortowani są według efektywności malejąco.
 
-Cały algorytm podzielony jest na dwa główne etapy:
+3. 👤 **Przypisywanie agentów:**
+   - Dla każdego agenta sprawdzane są ograniczenia:
+      - Maks. 8 godzin pracy dziennie.
+      - Maks. 3 agentów przypisanych do jednej predykcji.
+   - Jeżeli zapotrzebowanie zostało pokryte (`diffOccupancy <= 0`), pętla się kończy.
 
-1. **Obliczenie efektywności agentów** (`CalculateEfficiency`)
-2. **Wygenerowanie grafiku** (`ScheduleGenerate`)
-
----
-
-## 1. 📊 Obliczanie efektywności agentów
-
-**Plik:** `CalculateEfficiency.php`  
-**Cel:** Ustalić, jak efektywny jest każdy agent w każdej kolejce, na podstawie danych historycznych.
-
-### Krok po kroku:
-
-1. 📆 **Ustal okres analizy:**
-    - Jeśli nie podano dat – domyślnie: od początku poprzedniego miesiąca do teraz.
-
-2. 👥 **Pobierz agentów:**
-    - Jeśli `agentIds` są puste → pobierz wszystkich agentów z repozytorium.
-
-3. 🔁 **Dla każdego agenta:**
-    - Pobierz historię połączeń (`CallHistory`) z ostatnich tygodni.
-    - Przelicz efektywność za pomocą `EfficiencyCalculator`.
-
-4. ➗ **Dla każdej kolejki agenta:**
-    - Zsumuj liczbę połączeń w danych godzinach.
-    - Policz średnią liczbę połączeń na godzinę.
-    - Zapisz wynik jako `score` efektywności.
-
-5. 💾 **Zapisz wyniki:**
-    - Zmapuj dane do `EfficiencyCreateContract`.
-    - Zapisz do repozytorium (`upsert`).
-
----
-
-## 2. 🧠 Wygenerowanie grafiku
-
-**Plik:** `ScheduleGenerate.php`  
-**Cel:** Na podstawie predykcji i efektywności wygenerować optymalny grafik agentów.
-
-### Krok po kroku:
-
-1. 📦 **Pobierz dane:**
-    - Wszystkie obliczone wcześniej efektywności agentów.
-    - Predykcje zapotrzebowania (ile połączeń oczekiwanych w danym czasie i kolejce).
-
-2. 🔁 **Dla każdej godziny i kolejki (prediction):**
-    - Znajdź agentów, którzy mają przypisaną efektywność dla tej kolejki.
-
-3. 📈 **Posortuj agentów wg efektywności:**
-    - Najpierw ci, którzy mają najwyższy `score`.
-
-4. 👨‍💻 **Dla każdego agenta:**
-    - Sprawdź, czy agent ma już 8h pracy danego dnia.
-    - Sprawdź, czy już 3 agentów przypisano do tej predykcji.
-    - Przypisz agenta do zmiany (`ShiftCreateContract`).
-
-5. ⛔ **Zakończ przypisywanie agentów, jeśli:**
-    - Zapotrzebowanie zostało pokryte (`diffOccupancy <= 0`).
-
-6. 💾 **Zapisz wszystkie zmiany:**
-    - Użyj `shiftRepository->upsert()`.
+4. 💾 **Zapis zmian:**
+   - Wszystkie zmiany zapisywane są do repozytorium (`shiftRepository->upsert()`).
 
 ---
 
 ## ✅ Efekt końcowy
 
-Zoptymalizowany grafik agentów na podstawie:
-- historycznych danych i efektywności,
-- przewidywanego zapotrzebowania,
-- ograniczeń:
-    - max 8h pracy agenta dziennie,
-    - max 3 agentów przypisanych do jednej predykcji (kolejka + godzina).
+Wynikiem działania algorytmu jest zoptymalizowany tygodniowy grafik agentów, uwzględniający:
+
+- efektywność na podstawie danych historycznych,
+- przewidywane zapotrzebowanie,
+- ograniczenia:
+   - maksymalnie 8 godzin pracy dziennie,
+   - maksymalnie 3 agentów przypisanych do jednej godziny/kolejki.
 
 ---
 
-## 📌 Skrócone kroki
+## 🛠️ Instalacja i uruchomienie
 
-### I. `CalculateEfficiency`
+1. Zainstaluj **Docker** i **Docker Compose**.
+2. Upewnij się, że port **80** jest odblokowany.
+3. Dodaj do pliku `/etc/hosts`:
 
-1. Określ przedział czasu.
-2. Pobierz agentów.
-3. Dla każdego agenta:
-    - Pobierz historię połączeń.
-    - Oblicz efektywność (średnia połączeń na godzinę).
-    - Zapisz wynik.
+```
+127.0.0.1 api.scheduler
+127.0.0.1 frontend.scheduler
+```
 
----
+4. Uruchom skrypt:
 
-### II. `ScheduleGenerate`
+```bash
+./run
+```
 
-1. Pobierz efektywności i predykcje.
-2. Dla każdej predykcji:
-    - Znajdź agentów o najwyższej efektywności.
-    - Sprawdź limity (godzinowe i dzienne).
-    - Przypisz agentów aż do pokrycia zapotrzebowania.
-3. Zapisz grafik.
+5. Wybierz opcję **nr 6** z menu, aby uruchomić wszystkie serwisy.
 
 ---
 
-# Kroki instalacji:
+## 📋 Menu zarządzania (skrypt `./run`)
 
-1. Instalujemy docker i docker compose
-2. Odblokowujemy port 80
-3. Dodajemy api.scheduler i frontend.scheduler do /etc/hosts dla 127.0.0.1
-4. uruchamiamy skrypt ./run, wybieramy opcję nr 6 i to wszystko
-
-
-### Po uruchomieniu skryptu ./run wyświetli się poniższe menu:
-
+```plaintext
 🐳 Menu zarządzania kontenerami Docker Compose
 ---------------------------------------------
 1) Zbuduj wszystkie serwisy
@@ -195,3 +170,16 @@ Zoptymalizowany grafik agentów na podstawie:
 10) Zatrzymaj i usuń wszystkie serwisy
 11) Wyjście
 ---------------------------------------------
+```
+
+---
+
+## 📌 Podsumowanie
+
+Projekt zawiera:
+
+- Kompletny backend i frontend w jednym repozytorium.
+- Diagram algorytmu w formie ASCII art.
+- Testy jednostkowe dla warstwy domenowej.
+- Zgodność z PHPStan i PHP Code Beautifier.
+- Obsługę asynchronicznego generowania grafików przez Symfony Messenger.
