@@ -16,60 +16,90 @@ const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
     borderRadius: '8px',
 }));
 
+const flattenObject = (obj, prefix = '') => {
+    return Object.entries(obj).reduce((acc, [key, value]) => {
+        const newKey = prefix ? `${prefix}.${key}` : key;
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+            Object.assign(acc, flattenObject(value, newKey));
+        } else {
+            acc[newKey] = value;
+        }
+        return acc;
+    }, {});
+};
+
+const formatHeaderName = (key) => {
+    return key
+        .split('.')
+        .filter(k => k !== 'id')
+        .map(k => k.charAt(0).toUpperCase() + k.slice(1))
+        .join(' ');
+};
+
 const generateColumns = (data) => {
     if (data.length === 0) return [];
-    const keys = Object.keys(data[0]);
-    return keys.map((key) => ({
-        field: key,
-        headerName: key.charAt(0).toUpperCase() + key.slice(1),
-        width: 200,
-        sortable: true,
-        filterable: true,
-        hide: key === 'id',
-        renderCell: (params) => {
-            const value = params.value;
-            if (value && typeof value === 'object') {
-                return (
-                    value.name ||
-                    value.title ||
-                    value.email ||
-                    value.city ||
-                    value.score ||
-                    JSON.stringify(value)
-                );
-            }
-            return value;
-        },
-    }));
+
+    const firstRow = flattenObject(data[0]);
+
+    return Object.keys(firstRow)
+        .filter((key) => key !== 'id' && !key.endsWith('.id'))
+        .map((key) => ({
+            field: key,
+            headerName: formatHeaderName(key),
+            width: 200,
+            sortable: true,
+            filterable: true,
+            renderCell: (params) => {
+                const value = params.value;
+                if (value && typeof value === 'object') {
+                    return (
+                        value.name ||
+                        JSON.stringify(value)
+                    );
+                }
+                return value ?? '';
+            },
+        }));
 };
 
 const DataGridTable = ({ rows = [] }) => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
 
-    const columns = useMemo(() => generateColumns(rows), [rows]);
+    const flatRows = useMemo(
+        () =>
+            rows.map((row, index) => {
+                const flat = flattenObject(row);
+                return {
+                    id: row.id ?? index,
+                    ...flat,
+                };
+            }),
+        [rows]
+    );
 
-    const totalRows = rows.length;
+    const columns = useMemo(() => generateColumns(flatRows), [flatRows]);
+
+    const totalRows = flatRows.length;
     const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
     const startIdx = paginationModel.page * paginationModel.pageSize;
     const endIdx = startIdx + paginationModel.pageSize;
-    const paginatedRows = rows.slice(startIdx, endIdx);
+    const paginatedRows = flatRows.slice(startIdx, endIdx);
 
     useEffect(() => {
         if (paginationModel.page >= totalPages) {
             setPaginationModel((prev) => ({ ...prev, page: 0 }));
         }
-    }, [rows, paginationModel.pageSize, paginationModel.page, totalPages]);
+    }, [paginationModel.page, paginationModel.pageSize, totalPages]);
 
     const handlePageChange = (event, newPage) => {
         setPaginationModel((prev) => ({ ...prev, page: newPage }));
     };
 
     const handlePageSizeChange = (event) => {
-        setPaginationModel((prev) => ({
-            ...prev,
+        setPaginationModel({
             pageSize: parseInt(event.target.value, 10),
             page: 0,
-        }));
+        });
     };
 
     return (
