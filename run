@@ -1,25 +1,45 @@
 #!/bin/bash
 
 if [[ $EUID -ne 0 ]]; then
-    echo "This script must be run as root. Use sudo."
+    echo "Ten skrypt musi być uruchomiony jako root. Użyj sudo."
     exit 1
 fi
+
+copy_env_files() {
+    echo "📁 Sprawdzanie i kopiowanie plików .env..."
+
+    for dir in "." "./backend" "./frontend"; do
+        env_file="$dir/.env"
+        example_file="$dir/.env.example"
+
+        if [[ -f "$env_file" ]]; then
+            echo "✅ Plik $env_file już istnieje – pomijam kopiowanie."
+        elif [[ -f "$example_file" ]]; then
+            cp "$example_file" "$env_file"
+            echo "📄 Skopiowano $example_file do $env_file"
+        else
+            echo "⚠️ Brak pliku $example_file – pomijam kopiowanie."
+        fi
+    done
+}
 
 generate_ssl_certificates() {
     if [ -f ./backend/nginx/certs/api.crt ] && [ -f ./backend/nginx/private/api.key ] && \
        [ -f ./backend/nginx/certs/frontend.crt ] && [ -f ./backend/nginx/private/frontend.key ]; then
-        echo "SSL certificates already exist, skipping generation."
+        echo "✅ Certyfikaty SSL już istnieją – pomijam generowanie."
     else
-        echo "Generating self-signed SSL certificates..."
+        echo "🔐 Generowanie certyfikatów SSL..."
 
         mkdir -p ./backend/nginx/certs
         mkdir -p ./backend/nginx/private
 
         openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/api.key -x509 -out ./backend/nginx/certs/api.crt -days 365 \
-            -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=api.scheduler"
+            -subj "/C=PL/ST=Mazowieckie/L=Warszawa/O=Firma/OU=Dzial/CN=api.scheduler"
 
         openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/frontend.key -x509 -out ./backend/nginx/certs/frontend.crt -days 365 \
-            -subj "/C=US/ST=State/L=City/O=Company/OU=Org/CN=frontend.scheduler"
+            -subj "/C=PL/ST=Mazowieckie/L=Warszawa/O=Firma/OU=Dzial/CN=frontend.scheduler"
+
+        echo "✅ Certyfikaty SSL zostały wygenerowane."
     fi
 }
 
@@ -28,151 +48,131 @@ get_app_env() {
         export $(grep -v '^#' .env | xargs)
         echo $APP_ENV
     else
-        echo "Error: .env file not found!"
+        echo "❌ Błąd: plik .env nie został znaleziony!"
         exit 1
     fi
 }
 
 copy_nginx_config_files() {
-    ENV=$(get_app_env)
-    echo 'test'
-    echo "Copying Nginx config files based on APP_ENV ($ENV)..."
+    env=$(get_app_env)
+    echo "⚙️  Kopiowanie konfiguracji Nginx na podstawie APP_ENV=$env..."
 
-    cp ./backend/nginx/api.conf.$ENV.example ./backend/nginx/api.conf
-    cp ./backend/nginx/frontend.conf.$ENV.example ./backend/nginx/frontend.conf
+    cp "./backend/nginx/api.conf.$env.example" "./backend/nginx/api.conf"
+    cp "./backend/nginx/frontend.conf.$env.example" "./backend/nginx/frontend.conf"
+
+    echo "✅ Skonfigurowano pliki Nginx."
 }
 
 show_menu() {
     clear
-    echo "--------------------------------"
-    echo " Docker Compose Management Menu"
-    echo "--------------------------------"
-    echo "1) Build services"
-    echo "2) Restart services"
-    echo "3) Force recreate services"
-    echo "4) Build & Restart a specific service"
-    echo "5) Build all services & Restart"
-    echo "6) Start all services"
-    echo "7) View logs"
-    echo "8) View logs for a specific service"
-    echo "9) Check Docker status"
-    echo "10) Shutdown and remove all services"
-    echo "11) Exit"
-    echo "--------------------------------"
+    echo "---------------------------------------------"
+    echo " 🐳 Menu zarządzania kontenerami Docker Compose"
+    echo "---------------------------------------------"
+    echo "1) Zbuduj wszystkie serwisy"
+    echo "2) Restartuj wszystkie serwisy"
+    echo "3) Wymuś przebudowę i restart"
+    echo "4) Zbuduj i restartuj konkretny serwis"
+    echo "5) Zbuduj wszystkie i restartuj"
+    echo "6) Uruchom wszystkie serwisy"
+    echo "7) Podgląd logów wszystkich serwisów"
+    echo "8) Podgląd logów konkretnego serwisu"
+    echo "9) Sprawdź status serwisów"
+    echo "10) Zatrzymaj i usuń wszystkie serwisy"
+    echo "11) Wyjście"
+    echo "---------------------------------------------"
 }
 
 build_services() {
-    echo "Building all services..."
+    echo "🔨 Budowanie wszystkich serwisów..."
     docker compose build
 }
 
 restart_services() {
-    echo "Restarting all services..."
+    echo "🔁 Restartowanie wszystkich serwisów..."
     docker compose restart
 }
 
 force_recreate_services() {
-    echo "Force recreating all services..."
+    echo "♻️  Wymuszanie przebudowy i restartu wszystkich serwisów..."
     docker compose up --force-recreate -d
 }
 
 build_and_restart_service() {
-    echo "Enter the service name to build & restart:"
+    echo "🔧 Podaj nazwę serwisu do zbudowania i restartu:"
     read service
-    docker compose up --build --no-deps -d $service
+    docker compose up --build --no-deps -d "$service"
 }
 
 build_all_and_restart() {
+    echo "🏗️  Budowanie i uruchamianie wszystkich serwisów..."
     docker compose up --build -d
-    echo "All services built and restarted!"
 }
 
 start_services() {
-    echo "Starting all services..."
+    echo "🚀 Uruchamianie wszystkich serwisów..."
     docker compose up -d
 }
 
 view_logs() {
-    echo "Viewing logs for all services..."
+    echo "📋 Wyświetlanie logów wszystkich serwisów..."
     docker compose logs -f
 }
 
 view_logs_for_service() {
-    echo "Enter the service name to view logs:"
+    echo "📋 Podaj nazwę serwisu do podglądu logów:"
     read service
     if [[ -z "$service" ]]; then
-        echo "Error: No service name provided."
+        echo "❗ Błąd: nie podano nazwy serwisu."
         return
     fi
-    docker compose logs -f $service
+    docker compose logs -f "$service"
 }
 
 check_docker_status() {
-    echo "Checking Docker Compose status..."
+    echo "📦 Sprawdzanie statusu serwisów..."
     docker compose ps
 }
 
 shutdown_and_remove_all_services() {
-    echo "Shutting down and removing all services..."
+    echo "🛑 Zatrzymywanie i usuwanie wszystkich serwisów..."
     docker compose down --volumes --remove-orphans
-    echo "All services shut down and removed."
+    echo "🧹 Wszystkie serwisy zostały zatrzymane i usunięte."
 }
 
 set_permissions() {
-    echo "Setting permissions for the script..."
+    echo "🔐 Ustawianie uprawnień..."
     chmod +x run.sh
     chmod -R 755 ./backend/db_data
-    echo "Permissions set successfully!"
+    echo "✅ Uprawnienia ustawione pomyślnie."
 }
 
 while true; do
+    copy_env_files
     generate_ssl_certificates
     copy_nginx_config_files
 
     show_menu
-    echo -n "Select an option: "
+    echo -n "🔽 Wybierz opcję: "
     read option
 
     case $option in
-        1)
-            build_services
-            ;;
-        2)
-            restart_services
-            ;;
-        3)
-            force_recreate_services
-            ;;
-        4)
-            build_and_restart_service
-            ;;
-        5)
-            build_all_and_restart
-            ;;
-        6)
-            start_services
-            ;;
-        7)
-            view_logs
-            ;;
-        8)
-            view_logs_for_service
-            ;;
-        9)
-            check_docker_status
-            ;;
-        10)
-            shutdown_and_remove_all_services
-            ;;
+        1) build_services ;;
+        2) restart_services ;;
+        3) force_recreate_services ;;
+        4) build_and_restart_service ;;
+        5) build_all_and_restart ;;
+        6) start_services ;;
+        7) view_logs ;;
+        8) view_logs_for_service ;;
+        9) check_docker_status ;;
+        10) shutdown_and_remove_all_services ;;
         11)
-            echo "Exiting..."
+            echo "👋 Zamykanie skryptu..."
             exit 0
             ;;
-        *)
-            echo "Invalid option. Please try again."
-            ;;
+        *) echo "❌ Nieprawidłowa opcja. Spróbuj ponownie." ;;
     esac
 
-    echo "Press any key to continue..."
+    echo "🔁 Naciśnij dowolny klawisz, aby kontynuować..."
     read -n 1 -s
 done
