@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Box, CircularProgress, Snackbar } from '@mui/material';
+import { Container, Box, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
 import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts} from '../../api';
 import DataGridTable from './DataGridTable';
