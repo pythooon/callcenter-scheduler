@@ -81,9 +81,6 @@ const DataGridTable = ({ rows = [] }) => {
 
     const totalRows = flatRows.length;
     const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
-    const startIdx = paginationModel.page * paginationModel.pageSize;
-    const endIdx = startIdx + paginationModel.pageSize;
-    const paginatedRows = flatRows.slice(startIdx, endIdx);
 
     useEffect(() => {
         if (paginationModel.page >= totalPages) {
@@ -117,7 +114,7 @@ const DataGridTable = ({ rows = [] }) => {
                     </Typography>
                 ) : (
                     <StyledDataGrid
-                        rows={paginatedRows}
+                        rows={flatRows}
                         columns={columns}
                         pageSize={paginationModel.pageSize}
                         pagination

@@ -231,7 +231,7 @@ const SchedulerTable = () => {
                                         key={index}
                                         isHighlighted={isToday(getWeekDates[index])}
                                         style={{
-                                            backgroundColor: isToday(getWeekDates[index]) ? '#c5e1a5' : 'transparent',
+                                            backgroundColor: isToday(getWeekDates[index]) ? '#c5e1a5' : '#f0f0f0',
                                         }}
                                     >
                                         {day} ({getWeekDates[index]})
