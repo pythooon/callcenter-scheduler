@@ -1,7 +1,6 @@
 server {
     listen 80;
     server_name call-center.pythdev.pl;
-    return 301 https://$host$request_uri;
 
     location / {
         auth_basic "Access Denied";

@@ -1,7 +1,6 @@
 server {
     listen 80;
     server_name api.scheduler;
-    return 301 https://$host$request_uri;
 
     location / {
         try_files $uri /index.php$is_args$args;

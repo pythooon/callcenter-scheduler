@@ -1,7 +1,6 @@
 server {
     listen 80;
     server_name api-call-center.pythdev.pl;
-    return 301 https://$host$request_uri;
 
     root /var/www/api/public;
     index index.php;
