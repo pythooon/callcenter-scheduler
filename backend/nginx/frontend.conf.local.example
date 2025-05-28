@@ -2,14 +2,6 @@ server {
     listen 80;
     server_name frontend.scheduler;
     return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl;
-    server_name frontend.scheduler;
-
-    ssl_certificate /etc/ssl/certs/frontend.crt;
-    ssl_certificate_key /etc/ssl/private/frontend.key;
 
     location / {
         auth_basic "Access Denied";

@@ -23,26 +23,6 @@ copy_env_files() {
     done
 }
 
-generate_ssl_certificates() {
-    if [ -f ./backend/nginx/certs/api.crt ] && [ -f ./backend/nginx/private/api.key ] && \
-       [ -f ./backend/nginx/certs/frontend.crt ] && [ -f ./backend/nginx/private/frontend.key ]; then
-        echo "✅ Certyfikaty SSL już istnieją – pomijam generowanie."
-    else
-        echo "🔐 Generowanie certyfikatów SSL..."
-
-        mkdir -p ./backend/nginx/certs
-        mkdir -p ./backend/nginx/private
-
-        openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/api.key -x509 -out ./backend/nginx/certs/api.crt -days 365 \
-            -subj "/C=PL/ST=Mazowieckie/L=Warszawa/O=Firma/OU=Dzial/CN=api.scheduler"
-
-        openssl req -newkey rsa:2048 -nodes -keyout ./backend/nginx/private/frontend.key -x509 -out ./backend/nginx/certs/frontend.crt -days 365 \
-            -subj "/C=PL/ST=Mazowieckie/L=Warszawa/O=Firma/OU=Dzial/CN=frontend.scheduler"
-
-        echo "✅ Certyfikaty SSL zostały wygenerowane."
-    fi
-}
-
 get_app_env() {
     if [[ -f .env ]]; then
         export $(grep -v '^#' .env | xargs)
@@ -148,7 +128,6 @@ set_permissions() {
 
 while true; do
     copy_env_files
-    generate_ssl_certificates
     copy_nginx_config_files
 
     show_menu
