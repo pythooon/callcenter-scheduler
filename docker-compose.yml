@@ -36,6 +36,8 @@ services:
       - ./backend/nginx/.htpasswd:/etc/nginx/.htpasswd
       - ./backend/nginx/api-certs:/etc/nginx/api-certs
       - ./backend/nginx/frontend-certs:/etc/nginx/frontend-certs
+      - ./backend/certbot/conf:/etc/letsencrypt
+      - ./backend/certbot/www:/var/www/certbot
     depends_on:
       - php
       - frontend
@@ -94,6 +96,16 @@ services:
       - ./backend/redis/redis.conf:/usr/local/etc/redis/redis.conf
     ports:
       - "6379:6379"
+    networks:
+      - scheduler
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./backend/certbot/conf:/etc/letsencrypt
+      - ./backend/certbot/www:/var/www/certbot
+    depends_on:
+      - nginx
     networks:
       - scheduler
 
