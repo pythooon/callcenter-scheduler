@@ -112,6 +112,9 @@ const SchedulerTable = () => {
                 setScheduleData(data);
                 setSnackbarMessage('Schedule generated!');
                 setSnackbarSeverity('success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
                 setSnackbarMessage('Failed to generate schedule.');
                 setSnackbarSeverity('error');
