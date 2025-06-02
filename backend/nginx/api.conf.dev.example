@@ -2,24 +2,8 @@ server {
     listen 80;
     server_name api-call-center.pythdev.pl;
 
-    location /.well-known/acme-challenge/ {
-        root /var/www/api/certbot;
-    }
-
-    location / {
-        return 301 https://$host$request_uri;
-    }
-}
-
-server {
-    listen 443 ssl;
-    server_name api-call-center.pythdev.pl;
-
     root /var/www/api/public;
     index index.php index.html;
-
-    ssl_certificate /etc/letsencrypt/live/api-call-center.pythdev.pl/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api-call-center.pythdev.pl/privkey.pem;
 
     set $cors_origin "https://call-center.pythdev.pl";
 
