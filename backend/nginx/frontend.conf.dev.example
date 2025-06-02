@@ -28,3 +28,4 @@ server {
     auth_basic "Access Denied";
     auth_basic_user_file /etc/nginx/.htpasswd;
 }
+
