@@ -45,7 +45,6 @@
       <path value="$PROJECT_DIR$/backend/vendor/twig/twig" />
       <path value="$PROJECT_DIR$/backend/vendor/ramsey/uuid" />
       <path value="$PROJECT_DIR$/backend/vendor/rector/rector" />
-      <path value="$PROJECT_DIR$/backend/vendor/nelmio/cors-bundle" />
       <path value="$PROJECT_DIR$/backend/vendor/ramsey/collection" />
       <path value="$PROJECT_DIR$/backend/vendor/composer" />
       <path value="$PROJECT_DIR$/backend/vendor/symfony/string" />

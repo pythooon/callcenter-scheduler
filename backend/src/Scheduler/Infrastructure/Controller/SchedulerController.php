@@ -7,21 +7,24 @@ namespace App\Scheduler\Infrastructure\Controller;
 use App\Scheduler\Application\SchedulerFacade;
 use App\Scheduler\Domain\Model\ScheduleCreate;
 use App\Scheduler\Domain\Request\ScheduleGenerateRequest;
-use App\Scheduler\Domain\Request\ShiftsRequest;
 use App\Scheduler\Infrastructure\Messages\SchedulerGenerateMessage;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Messenger\Exception\ExceptionInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
-final class ScheduleController extends AbstractController
+final class SchedulerController extends AbstractController
 {
     public function __construct(private SchedulerFacade $facade, private MessageBusInterface $bus)
     {
     }
 
+    /**
+     * @throws ExceptionInterface
+     */
     #[Route("/api/scheduler/generate", name: "scheduler_generate", methods: ["POST"])]
     public function scheduleGenerate(ScheduleGenerateRequest $request): JsonResponse
     {
