@@ -3,25 +3,25 @@ controllers:
     type: attribute
 scheduler_generate:
     path: /api/scheduler/generate
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::scheduleGenerate
+    controller: App\Scheduler\Infrastructure\Controller\SchedulerController::scheduleGenerate
     methods: [POST]
 scheduler_agents:
     path: /api/scheduler/agents
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::agents
+    controller: App\Scheduler\Infrastructure\Controller\SchedulerController::agents
     methods: [GET]
 scheduler_efficiencies:
     path: /api/scheduler/efficiencies
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::efficiencies
+    controller: App\Scheduler\Infrastructure\Controller\SchedulerController::efficiencies
     methods: [GET]
 scheduler_queues:
     path: /api/scheduler/queues
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::queues
+    controller: App\Scheduler\Infrastructure\Controller\SchedulerController::queues
     methods: [GET]
 scheduler_predictions:
     path: /api/scheduler/predictions
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::predictions
+    controller: App\Scheduler\Infrastructure\Controller\SchedulerController::predictions
     methods: [GET]
 scheduler_shifts:
     path: /api/scheduler/shifts
-    controller: App\Scheduler\Infrastructure\Controller\ScheduleController::shifts
+    controller: App\Scheduler\Infrastructure\Controller\SchedulerController::shifts
     methods: [GET]
