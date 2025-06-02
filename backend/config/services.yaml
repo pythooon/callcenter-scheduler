@@ -12,7 +12,7 @@ services:
             - '../src/Entity/'
             - '../src/Kernel.php'
 
-    App\Scheduler\Infrastructure\Controller\ScheduleController:
+    App\Scheduler\Infrastructure\Controller\SchedulerController:
         arguments:
             $facade: '@App\Scheduler\Application\SchedulerFacade'
 
