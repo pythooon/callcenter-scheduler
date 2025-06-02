@@ -26,8 +26,8 @@ final readonly class AgentRepositoryImpl implements AgentRepository
     /**
      * @param list<Uuid> $ids
      */
-    public function findByIds(array $ids = []): AgentListContract
+    public function findByQueueIds(array $ids = []): AgentListContract
     {
-        return $this->mapper::mapArrayToListContract($this->entityRepository->findByIds($ids));
+        return $this->mapper::mapArrayToListContract($this->entityRepository->findByQueueIds($ids));
     }
 }

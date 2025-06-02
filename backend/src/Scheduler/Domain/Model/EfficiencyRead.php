@@ -60,9 +60,11 @@ final readonly class EfficiencyRead implements EfficiencyReadContract
      */
     public function toArray(): array
     {
+        $agent = $this->agent->toArray();
+        unset($agent['queues']);
         return [
             'id' => (string)$this->id,
-            'agent' => $this->agent->toArray(),
+            'agent' => $agent,
             'queue' => $this->queue->toArray(),
             'score' => $this->score,
             'start' => $this->start->format('Y-m-d H:i:s'),

@@ -8,6 +8,7 @@ use App\Scheduler\Application\Contract\AgentListContract;
 use App\Scheduler\Application\Contract\EfficiencyListContract;
 use App\Scheduler\Application\Contract\PredictionListContract;
 use App\Scheduler\Application\Contract\QueueListContract;
+use App\Scheduler\Application\Contract\ScheduleCreateContract;
 use App\Scheduler\Application\Contract\ShiftListContract;
 use App\Scheduler\Application\SchedulerFacade;
 use App\Scheduler\Domain\UseCase\Agents\Agents;
@@ -17,7 +18,9 @@ use App\Scheduler\Domain\UseCase\Predictions\Predictions;
 use App\Scheduler\Domain\UseCase\Queues\Queues;
 use App\Scheduler\Domain\UseCase\ScheduleGenerate\ScheduleGenerate;
 use App\Scheduler\Domain\UseCase\Shifts\Shifts;
+use DateTime;
 use DateTimeInterface;
+use Throwable;
 
 final readonly class SchedulerFacadeImpl implements SchedulerFacade
 {
@@ -32,10 +35,13 @@ final readonly class SchedulerFacadeImpl implements SchedulerFacade
     ) {
     }
 
-    public function scheduleGenerate(): void
+    /**
+     * @throws Throwable
+     */
+    public function scheduleGenerate(ScheduleCreateContract $scheduleCreateContract): void
     {
-        $this->calculateEfficiency->run();
-        $this->scheduleGenerate->createWeeklySchedule();
+        $this->calculateEfficiency->run([$scheduleCreateContract->getQueueId()]);
+        $this->scheduleGenerate->run($scheduleCreateContract);
     }
 
     public function agents(): AgentListContract
@@ -58,8 +64,8 @@ final readonly class SchedulerFacadeImpl implements SchedulerFacade
         return $this->predictions->run();
     }
 
-    public function shifts(?DateTimeInterface $start, ?DateTimeInterface $end): ShiftListContract
+    public function shifts(?DateTimeInterface $startDate = null, ?DateTimeInterface $endDate = null): ShiftListContract
     {
-        return $this->shifts->run($start, $end);
+        return $this->shifts->run($startDate, $endDate);
     }
 }

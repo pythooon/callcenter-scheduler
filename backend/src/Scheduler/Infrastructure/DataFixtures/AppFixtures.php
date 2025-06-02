@@ -128,6 +128,7 @@ class AppFixtures extends Fixture
         $oneMonthLater = (clone $startDate)->modify('+1 month');
         $predictionInterval = new DateInterval('PT1H');
         $predictionPeriod = new DatePeriod($startDate, $predictionInterval, $oneMonthLater);
+        $existingPredictions = [];
 
         foreach ($predictionPeriod as $date) {
             if (in_array($date->format('N'), [6, 7])) {
@@ -138,28 +139,35 @@ class AppFixtures extends Fixture
                 $queue = $manager->getRepository(Queue::class)->findOneBy(['name' => $queueName]);
 
                 if ($queue) {
-                    if ($date->format('H') >= 10 && $date->format('H') < 18) {
-                        $time = (clone $date)->setTime((int) $date->format('H'), 0);
-                    } elseif ($date->format('H') >= 7 && $date->format('H') < 10) {
+                    $hour = (int) $date->format('H');
+                    if ($hour >= 10 && $hour < 18) {
+                        $time = (clone $date)->setTime($hour, 0);
+                    } elseif ($hour >= 7 && $hour < 10) {
                         $randomHour = random_int(7, 9);
                         $time = (clone $date)->setTime($randomHour, 0);
-                    } elseif ($date->format('H') >= 18 && $date->format('H') < 20) {
+                    } elseif ($hour >= 18 && $hour < 20) {
                         $randomHour = random_int(18, 19);
                         $time = (clone $date)->setTime($randomHour, 0);
                     } else {
                         continue;
                     }
 
-                    $occupancy = random_int(1, 10) * 10;
+                    $key = $queue->getId()->toRfc4122() . '|' . $time->format('Y-m-d H');
 
-                    $prediction = new Prediction();
-                    $prediction->setId(Uuid::v4());
-                    $prediction->setQueue($queue);
-                    $prediction->setDate($date);
-                    $prediction->setTime($time);
-                    $prediction->setOccupancy($occupancy);
+                    if (!isset($existingPredictions[$key])) {
+                        $existingPredictions[$key] = true;
 
-                    $manager->persist($prediction);
+                        $occupancy = random_int(1, 10) * 10;
+
+                        $prediction = new Prediction();
+                        $prediction->setId(Uuid::v4());
+                        $prediction->setQueue($queue);
+                        $prediction->setDate((clone $time));
+                        $prediction->setTime($time);
+                        $prediction->setOccupancy($occupancy);
+
+                        $manager->persist($prediction);
+                    }
                 }
             }
         }

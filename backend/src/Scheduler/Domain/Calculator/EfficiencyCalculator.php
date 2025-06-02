@@ -21,6 +21,7 @@ final readonly class EfficiencyCalculator
         DateTimeInterface $end
     ): EfficiencyListContract {
         $callsPerQueueAndHour = [];
+        $queuesUsed = [];
 
         foreach ($callHistoryList->getItems() as $callHistory) {
             $callDate = $callHistory->getDate();
@@ -30,7 +31,9 @@ final readonly class EfficiencyCalculator
             }
 
             $dateHourKey = $callDate->format('Y-m-d H:00');
-            $queueId = (string)$callHistory->getQueue()->getId();
+            $queue = $callHistory->getQueue();
+            $queueId = (string)$queue->getId();
+            $queuesUsed[$queueId] = $queue;
 
             if (!isset($callsPerQueueAndHour[$queueId][$dateHourKey])) {
                 $callsPerQueueAndHour[$queueId][$dateHourKey] = 0;
@@ -41,8 +44,7 @@ final readonly class EfficiencyCalculator
 
         $efficiencyList = new EfficiencyList();
 
-        foreach ($agent->getQueues()->getItems() as $queue) {
-            $queueId = (string)$queue->getId();
+        foreach ($queuesUsed as $queueId => $queue) {
             $hourlyCalls = $callsPerQueueAndHour[$queueId] ?? [];
 
             $totalCalls = array_sum($hourlyCalls);

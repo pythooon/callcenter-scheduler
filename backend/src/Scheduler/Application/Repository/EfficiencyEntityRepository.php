@@ -19,5 +19,5 @@ interface EfficiencyEntityRepository
     /**
      * @return list<Efficiency>
      */
-    public function findByAgentId(Uuid $id): array;
+    public function findByQueueId(Uuid $id): array;
 }

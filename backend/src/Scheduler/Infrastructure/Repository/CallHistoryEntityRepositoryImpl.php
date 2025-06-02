@@ -21,21 +21,29 @@ class CallHistoryEntityRepositoryImpl extends ServiceEntityRepository implements
     }
 
     /**
+     * @param Uuid $agentId
+     * @param list<Uuid> $queueIds
      * @return list<CallHistory>
      */
-    public function findByAgentId(Uuid $agentId): array
+    public function findByAgentIdAndQueueIds(Uuid $agentId, array $queueIds): array
     {
         $fromDate = new \DateTimeImmutable('-3 months');
 
-        /** @var list<CallHistory>|null $data */
-        $data = $this->createQueryBuilder('ch')
+        $qb = $this->createQueryBuilder('ch')
             ->where('ch.agent = :agent')
             ->andWhere('ch.date >= :fromDate')
-            ->setParameter('agent', $agentId->toBinary(), 'binary') // ustaw typ jako binary!
+            ->setParameter('agent', $agentId->toBinary(), 'binary')
             ->setParameter('fromDate', $fromDate)
-            ->orderBy('ch.date', 'DESC')
-            ->getQuery()
-            ->getResult();
+            ->orderBy('ch.date', 'DESC');
+
+        if (!empty($queueIds)) {
+            $qb->innerJoin('ch.queue', 'q')
+                ->andWhere('q.id IN (:queueIds)')
+                ->setParameter('queueIds', array_map(fn(Uuid $id) => $id->toBinary(), $queueIds));
+        }
+
+        /** @var list<CallHistory>|null $data */
+        $data = $qb->getQuery()->getResult();
 
         return is_array($data) ? $data : [];
     }

@@ -150,6 +150,7 @@ Wynikiem działania algorytmu jest zoptymalizowany tygodniowy grafik agentów, u
 ```
 
 5. Wybierz opcję **nr 6** z menu, aby uruchomić wszystkie serwisy.
+6. Wejdź w kontener frontendowy do warstwy shell i odpal w root katalogu aplikacji npm run build.
 
 ---
 

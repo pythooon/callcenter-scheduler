@@ -10,7 +10,9 @@ use Symfony\Component\Uid\Uuid;
 interface CallHistoryEntityRepository
 {
     /**
+     * @param Uuid $agentId
+     * @param list<Uuid> $queueIds
      * @return list<CallHistory>
      */
-    public function findByAgentId(Uuid $agentId): array;
+    public function findByAgentIdAndQueueIds(Uuid $agentId, array $queueIds): array;
 }

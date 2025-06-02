@@ -9,6 +9,7 @@ use App\Scheduler\Application\Contract\CallHistoryListContract;
 use App\Scheduler\Application\Repository\CallHistoryEntityRepository;
 use App\Scheduler\Application\Repository\CallHistoryRepository;
 use App\Scheduler\Domain\Mapper\CallHistoryMapper;
+use Symfony\Component\Uid\Uuid;
 
 final readonly class CallHistoryRepositoryImpl implements CallHistoryRepository
 {
@@ -18,9 +19,14 @@ final readonly class CallHistoryRepositoryImpl implements CallHistoryRepository
     ) {
     }
 
-    public function findByAgentReadContract(AgentReadContract $agentReadContract): CallHistoryListContract
+    /**
+     * @param AgentReadContract $agentReadContract
+     * @param list<Uuid> $queueIds
+     * @return CallHistoryListContract
+     */
+    public function findByAgentAndQueues(AgentReadContract $agentReadContract, array $queueIds): CallHistoryListContract
     {
-        $items = $this->entityRepository->findByAgentId($agentReadContract->getId());
+        $items = $this->entityRepository->findByAgentIdAndQueueIds($agentReadContract->getId(), $queueIds);
         return $this->mapper::mapArrayToListContract($items);
     }
 }

@@ -65,7 +65,10 @@ final readonly class ShiftRead implements ShiftReadContract
     {
         return [
             'id' => (string) $this->id,
-            'agent' => $this->agent->toArray(),
+            'agent' => [
+                'id' => (string) $this->agent->getId(),
+                'name' => $this->agent->getName(),
+            ],
             'queue' => $this->queue->toArray(),
             'start' => $this->start->format('Y-m-d H:i:s'),
             'end' => $this->end->format('Y-m-d H:i:s'),

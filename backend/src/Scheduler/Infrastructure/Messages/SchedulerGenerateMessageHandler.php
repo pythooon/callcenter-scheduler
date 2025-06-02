@@ -17,6 +17,6 @@ class SchedulerGenerateMessageHandler
 
     public function __invoke(SchedulerGenerateMessage $message): void
     {
-        $this->facade->scheduleGenerate();
+        $this->facade->scheduleGenerate($message->getScheduleCreateContract());
     }
 }

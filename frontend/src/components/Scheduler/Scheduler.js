@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Box, CircularProgress } from '@mui/material';
 import { motion } from 'framer-motion';
-import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts} from '../../api';
+import { fetchAgents, fetchEfficiencies, fetchQueues, fetchPredictions, fetchShifts } from '../../api';
 import DataGridTable from './DataGridTable';
 import SchedulerTable from './SchedulerTable';
 import TabsComponent from './TabsComponent';
@@ -41,16 +41,17 @@ const Scheduler = () => {
 
     useEffect(() => {
         const fetchDataForTab = async () => {
+            const selectedTabData = tabData[selectedTab];
+            if (!selectedTabData?.fetchData) return;
+            if (data[selectedTabData.key]) return;
+
             setLoading(true);
             try {
-                const selectedTabData = tabData[selectedTab];
-                if (selectedTabData && !data[selectedTabData.key]) {
-                    const newData = await selectedTabData.fetchData();
-                    setData(prevData => ({
-                        ...prevData,
-                        [selectedTabData.key]: newData
-                    }));
-                }
+                const newData = await selectedTabData.fetchData();
+                setData(prevData => ({
+                    ...prevData,
+                    [selectedTabData.key]: newData
+                }));
             } catch (error) {
                 console.error('Error fetching data for tab:', error);
             } finally {

@@ -16,6 +16,8 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use Throwable;
 
+use function var_dump;
+
 final readonly class CalculateEfficiency
 {
     public function __construct(
@@ -29,27 +31,26 @@ final readonly class CalculateEfficiency
     }
 
     /**
-     * @param list<Uuid> $agentIds
-     * @param DateTimeInterface|null $start
-     * @param DateTimeInterface|null $end
+     * @param list<Uuid|null> $queueIds
      * @return EfficiencyListContract
      * @throws Throwable
      */
     public function run(
-        array $agentIds = [],
-        ?DateTimeInterface $start = null,
-        ?DateTimeInterface $end = null
+        array $queueIds = []
     ): EfficiencyListContract {
-        $start ??= new DateTime('first day of previous month 00:00')->setTime(0, 0, 0);
-        $end ??= new DateTime('now')->setTime(23, 59, 59);
+        $start = new DateTime('first day of previous month 00:00')->setTime(0, 0, 0);
+        $end = new DateTime('now')->setTime(23, 59, 59);
 
         try {
-            $agents = empty($agentIds)
-                ? $this->agentRepository->findAll()
-                : $this->agentRepository->findByIds($agentIds);
+            if (empty($queueIds)) {
+                $agents = $this->agentRepository->findAll();
+            } else {
+                /** @var list<Uuid> $queueIds */
+                $agents = $this->agentRepository->findByQueueIds($queueIds);
+            }
         } catch (Throwable $e) {
             $this->logger->error('Failed to fetch agents', [
-                'agentIds' => $agentIds,
+                'queueIds' => $queueIds,
                 'exception' => $e,
             ]);
             throw $e;
@@ -57,7 +58,7 @@ final readonly class CalculateEfficiency
 
         foreach ($agents->getItems() as $agentReadContract) {
             try {
-                $callHistoryList = $this->callHistoryRepository->findByAgentReadContract($agentReadContract);
+                $callHistoryList = $this->callHistoryRepository->findByAgentAndQueues($agentReadContract, $queueIds);
                 $efficiencies = $this->efficiencyCalculator->calculate(
                     $agentReadContract,
                     $callHistoryList,

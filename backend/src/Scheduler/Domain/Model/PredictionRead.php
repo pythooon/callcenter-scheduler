@@ -50,7 +50,7 @@ final class PredictionRead implements PredictionReadContract
 
     public function diffOccupancy(float $score): int
     {
-        $this->diffOccupancy -= (int) floor($score);
+        $this->diffOccupancy -= (int)floor($score);
         return $this->diffOccupancy;
     }
 
@@ -59,8 +59,7 @@ final class PredictionRead implements PredictionReadContract
         return [
             'id' => $this->id,
             'queue' => $this->queue->toArray(),
-            'date' => $this->date->format('Y-m-d'),
-            'time' => $this->time->format('H:i'),
+            'dateTime' => $this->date->format('Y-m-d') . ' ' . $this->time->format('H:i'),
             'occupancy' => $this->occupancy,
         ];
     }

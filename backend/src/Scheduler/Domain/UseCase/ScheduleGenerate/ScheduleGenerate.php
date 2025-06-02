@@ -8,6 +8,7 @@ use App\Scheduler\Application\Contract\AgentReadContract;
 use App\Scheduler\Application\Contract\EfficiencyListContract;
 use App\Scheduler\Application\Contract\PredictionListContract;
 use App\Scheduler\Application\Contract\PredictionReadContract;
+use App\Scheduler\Application\Contract\ScheduleCreateContract;
 use App\Scheduler\Application\Contract\ShiftCreateContract;
 use App\Scheduler\Application\Repository\EfficiencyRepository;
 use App\Scheduler\Application\Repository\PredictionRepository;
@@ -16,8 +17,8 @@ use App\Scheduler\Domain\Mapper\ShiftMapper;
 
 final readonly class ScheduleGenerate
 {
-    private const MAX_WORK_HOURS_PER_DAY = 8;
-    private const MAX_AGENTS_PER_PREDICTION = 3;
+    private const int MAX_WORK_HOURS_PER_DAY = 8;
+    private const int MAX_AGENTS_PER_PREDICTION = 3;
 
     public function __construct(
         private EfficiencyRepository $efficiencyRepository,
@@ -30,10 +31,14 @@ final readonly class ScheduleGenerate
     /**
      * @return list<ShiftCreateContract>
      */
-    public function createWeeklySchedule(): array
+    public function run(ScheduleCreateContract $scheduleCreateContract): array
     {
-        $efficiencyList = $this->efficiencyRepository->findAll();
-        $predictionList = $this->predictionRepository->findAll();
+        $efficiencyList = $this->prepareEfficiencyList($scheduleCreateContract);
+        $predictionList = $this->predictionRepository->findByStartAndEndDate(
+            $scheduleCreateContract->getStartDate(),
+            $scheduleCreateContract->getEndDate(),
+            $scheduleCreateContract->getQueueId()
+        );
 
         $schedule = $this->generateSchedule($efficiencyList, $predictionList);
 
@@ -104,5 +109,12 @@ final readonly class ScheduleGenerate
         }
 
         return $agents;
+    }
+
+    private function prepareEfficiencyList(ScheduleCreateContract $scheduleCreateContract): EfficiencyListContract
+    {
+        return $scheduleCreateContract->getQueueId() === null ?
+            $this->efficiencyRepository->findAll() :
+            $this->efficiencyRepository->findByQueueId($scheduleCreateContract->getQueueId());
     }
 }

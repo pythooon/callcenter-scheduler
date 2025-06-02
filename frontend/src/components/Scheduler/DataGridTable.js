@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, TablePagination, styled, Typography } from '@mui/material';
+import { Box, TablePagination, styled, Typography, TextField } from '@mui/material';
 import { motion } from 'framer-motion';
 import './DataGridTable.css';
 
@@ -52,10 +52,7 @@ const generateColumns = (data) => {
             renderCell: (params) => {
                 const value = params.value;
                 if (value && typeof value === 'object') {
-                    return (
-                        value.name ||
-                        JSON.stringify(value)
-                    );
+                    return value.name || JSON.stringify(value);
                 }
                 return value ?? '';
             },
@@ -64,6 +61,7 @@ const generateColumns = (data) => {
 
 const DataGridTable = ({ rows = [] }) => {
     const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 10 });
+    const [searchTerm, setSearchTerm] = useState('');
 
     const flatRows = useMemo(
         () =>
@@ -79,7 +77,20 @@ const DataGridTable = ({ rows = [] }) => {
 
     const columns = useMemo(() => generateColumns(flatRows), [flatRows]);
 
-    const totalRows = flatRows.length;
+    // 🔍 Filtrowanie po tekście
+    const filteredRows = useMemo(() => {
+        if (!searchTerm.trim()) return flatRows;
+
+        const lowerTerm = searchTerm.toLowerCase();
+
+        return flatRows.filter(row =>
+            Object.values(row).some(value =>
+                String(value).toLowerCase().includes(lowerTerm)
+            )
+        );
+    }, [flatRows, searchTerm]);
+
+    const totalRows = filteredRows.length;
     const totalPages = Math.ceil(totalRows / paginationModel.pageSize);
 
     useEffect(() => {
@@ -99,8 +110,24 @@ const DataGridTable = ({ rows = [] }) => {
         });
     };
 
+    const paginatedRows = useMemo(() => {
+        const start = paginationModel.page * paginationModel.pageSize;
+        const end = start + paginationModel.pageSize;
+        return filteredRows.slice(start, end);
+    }, [filteredRows, paginationModel]);
+
     return (
         <Box sx={{ maxWidth: '1200px', margin: 'auto' }}>
+            <Box mt={2} mb={2}>
+                <TextField
+                    fullWidth
+                    label="Search"
+                    variant="outlined"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </Box>
+
             <motion.div
                 key="data-grid"
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -114,16 +141,13 @@ const DataGridTable = ({ rows = [] }) => {
                     </Typography>
                 ) : (
                     <StyledDataGrid
-                        rows={flatRows}
+                        rows={paginatedRows}
                         columns={columns}
                         pageSize={paginationModel.pageSize}
-                        pagination
-                        page={paginationModel.page}
-                        onPageChange={handlePageChange}
-                        rowsPerPageOptions={[5, 10, 25, 50]}
+                        pagination={false}
                         disableColumnMenu
                         autoHeight
-                        hideFooterSelectedRowCount
+                        hideFooter
                         sx={{
                             '& .MuiDataGrid-virtualScroller': {
                                 overflow: 'auto !important',
@@ -133,11 +157,11 @@ const DataGridTable = ({ rows = [] }) => {
                 )}
             </motion.div>
 
-            {rows.length > 0 && (
+            {filteredRows.length > 0 && (
                 <Box display="flex" justifyContent="flex-end" mt={2}>
                     <TablePagination
                         component="div"
-                        count={totalRows}
+                        count={filteredRows.length}
                         page={paginationModel.page}
                         onPageChange={handlePageChange}
                         rowsPerPage={paginationModel.pageSize}

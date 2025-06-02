@@ -5,6 +5,43 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+generate_ssl_certs() {
+    echo "🔒 Sprawdzanie certyfikatów SSL..."
+
+    declare -A domains
+    domains["api.scheduler"]="backend/nginx/api-certs"
+    domains["frontend.scheduler"]="backend/nginx/frontend-certs"
+
+    for domain in "${!domains[@]}"; do
+        dir="${domains[$domain]}"
+        mkdir -p "$dir"
+
+        cert="$dir/selfsigned.crt"
+        key="$dir/selfsigned.key"
+
+        if [[ -f "$cert" && -f "$key" ]]; then
+            echo "✅ Certyfikaty dla $domain już istnieją – pomijam generowanie."
+        else
+            echo "📦 Generowanie certyfikatów dla $domain:"
+            echo "  🔹 cert: $cert"
+            echo "  🔹 key:  $key"
+
+            openssl req -x509 -nodes -days 365 \
+                -newkey rsa:2048 \
+                -keyout "$key" \
+                -out "$cert" \
+                -subj "/C=PL/ST=Local/L=Dev/O=LocalDev/OU=Dev/CN=$domain"
+
+            sudo chmod 777 "$key" "$cert" 2>/dev/null || true
+
+            echo "🔐 Certyfikat i klucz dla $domain zostały wygenerowane."
+        fi
+
+        echo "📁 Zawartość katalogu $dir:"
+        ls -l "$dir"
+    done
+}
+
 copy_env_files() {
     echo "📁 Sprawdzanie i kopiowanie plików .env..."
 
@@ -129,6 +166,7 @@ set_permissions() {
 while true; do
     copy_env_files
     copy_nginx_config_files
+    generate_ssl_certs
 
     show_menu
     echo -n "🔽 Wybierz opcję: "

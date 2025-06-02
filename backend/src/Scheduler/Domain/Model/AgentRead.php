@@ -9,6 +9,7 @@ use App\Scheduler\Application\Contract\CallHistoryListContract;
 use App\Scheduler\Application\Contract\EfficiencyListContract;
 use App\Scheduler\Application\Contract\EfficiencyReadContract;
 use App\Scheduler\Application\Contract\QueueListContract;
+use App\Scheduler\Application\Contract\QueueReadContract;
 use Symfony\Component\Uid\Uuid;
 
 final class AgentRead implements AgentReadContract
@@ -60,7 +61,8 @@ final class AgentRead implements AgentReadContract
     /**
      * @return array{
      *     id: string,
-     *     name: string
+     *     name: string,
+     *     queues: string
      * }
      */
     public function toArray(): array
@@ -68,6 +70,13 @@ final class AgentRead implements AgentReadContract
         return [
             'id' => (string)$this->id,
             'name' => $this->name,
+            'queues' => implode(
+                ',',
+                array_map(
+                    fn(QueueReadContract $queueReadContract) => $queueReadContract->getName(),
+                    $this->queues->getItems()
+                )
+            ),
         ];
     }
 }

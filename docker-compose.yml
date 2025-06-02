@@ -5,7 +5,6 @@ services:
       dockerfile: .docker/Dockerfile
     volumes:
       - ./backend:/var/www/api
-      - ./backend/.docker/consumer.conf:/etc/supervisor/conf.d/consumer.conf
       - ./backend/.docker/php.ini:/etc/php/8.4/fpm/php.ini
       - ./backend/.docker/php.ini:/etc/php/8.4/cli/php.ini
     environment:
@@ -30,11 +29,13 @@ services:
     restart: always
     volumes:
       - ./backend:/var/www/api
-      - ./frontend/build:/var/www/app
+      - ./frontend:/var/www/app
       - ./backend/nginx/api.conf:/etc/nginx/conf.d/api.conf
       - ./backend/nginx/frontend.conf:/etc/nginx/conf.d/frontend.conf
       - ./backend/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./backend/nginx/.htpasswd:/etc/nginx/.htpasswd
+      - ./backend/nginx/api-certs:/etc/nginx/api-certs
+      - ./backend/nginx/frontend-certs:/etc/nginx/frontend-certs
     depends_on:
       - php
       - frontend

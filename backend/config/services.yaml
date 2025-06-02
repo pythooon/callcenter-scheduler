@@ -26,3 +26,5 @@ services:
             $facade: '@App\Scheduler\Application\SchedulerFacade'
         tags:
             - { name: 'messenger.message_handler', bus: 'scheduler_bus' }
+    App\Scheduler\Infrastructure\Controller\Request\ScheduleGenerateRequestResolver:
+        tags: [ controller.argument_value_resolver ]

@@ -8,12 +8,13 @@ use App\Scheduler\Application\Contract\AgentListContract;
 use App\Scheduler\Application\Contract\EfficiencyListContract;
 use App\Scheduler\Application\Contract\PredictionListContract;
 use App\Scheduler\Application\Contract\QueueListContract;
+use App\Scheduler\Application\Contract\ScheduleCreateContract;
 use App\Scheduler\Application\Contract\ShiftListContract;
-use DateTime;
+use DateTimeInterface;
 
 interface SchedulerFacade
 {
-    public function scheduleGenerate(): void;
+    public function scheduleGenerate(ScheduleCreateContract $scheduleCreateContract): void;
 
     public function agents(): AgentListContract;
 
@@ -23,5 +24,5 @@ interface SchedulerFacade
 
     public function predictions(): PredictionListContract;
 
-    public function shifts(?DateTime $start, ?DateTime $end): ShiftListContract;
+    public function shifts(?DateTimeInterface $startDate = null, ?DateTimeInterface $endDate = null): ShiftListContract;
 }

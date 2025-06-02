@@ -27,12 +27,12 @@ final class EfficiencyEntityRepositoryImpl extends ServiceEntityRepository imple
         parent::__construct($registry, Efficiency::class);
     }
 
-    public function findByAgentId(Uuid $id): array
+    public function findByQueueId(Uuid $id): array
     {
         /** @var list<Efficiency>|null $data */
         $data = $this->createQueryBuilder('e')
-            ->andWhere('e.agent = :agentId')
-            ->setParameter('agentId', $id)
+            ->andWhere('e.queue = :queueId')
+            ->setParameter('queueId', $id->toBinary(), 'binary')
             ->getQuery()
             ->getResult();
 
@@ -51,8 +51,8 @@ final class EfficiencyEntityRepositoryImpl extends ServiceEntityRepository imple
             ->join('e.queue', 'q')
             ->where('a.id = :agentId')
             ->andWhere('q.id = :queueId')
-            ->setParameter('agentId', $agentId, 'uuid')
-            ->setParameter('queueId', $queueId, 'uuid')
+            ->setParameter('agentId', $agentId->toBinary(), 'binary')
+            ->setParameter('queueId', $queueId->toBinary(), 'binary')
             ->getQuery()
             ->getOneOrNullResult();
 

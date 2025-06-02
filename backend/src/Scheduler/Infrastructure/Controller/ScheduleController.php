@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Scheduler\Infrastructure\Controller;
 
 use App\Scheduler\Application\SchedulerFacade;
+use App\Scheduler\Domain\Model\ScheduleCreate;
+use App\Scheduler\Domain\Request\ScheduleGenerateRequest;
+use App\Scheduler\Domain\Request\ShiftsRequest;
 use App\Scheduler\Infrastructure\Messages\SchedulerGenerateMessage;
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,9 +23,10 @@ final class ScheduleController extends AbstractController
     }
 
     #[Route("/api/scheduler/generate", name: "scheduler_generate", methods: ["POST"])]
-    public function scheduleGenerate(): JsonResponse
+    public function scheduleGenerate(ScheduleGenerateRequest $request): JsonResponse
     {
-        $this->bus->dispatch(new SchedulerGenerateMessage());
+        $scheduleCreate = new ScheduleCreate($request->getQueueId(), $request->getStartDate(), $request->getEndDate());
+        $this->bus->dispatch(new SchedulerGenerateMessage($scheduleCreate));
         return $this->json([], 204);
     }
 
@@ -57,22 +61,32 @@ final class ScheduleController extends AbstractController
     #[Route("/api/scheduler/shifts", name: "scheduler_shifts", methods: ["GET"])]
     public function shifts(Request $request): JsonResponse
     {
+        [$startDate, $endDate] = $this->prepareStartAndEndDates($request);
+        $shifts = $this->facade->shifts($startDate, $endDate);
+
+        return $this->json($shifts->toArray());
+    }
+
+    /**
+     * @param Request $request
+     * @return list<DateTime|null>
+     * @throws \DateMalformedStringException
+     */
+    private function prepareStartAndEndDates(Request $request): array
+    {
         $start = $request->query->get('start_date');
         $end = $request->query->get('end_date');
 
         $startDate = null;
         $endDate = null;
 
-        if ($start !== null && is_string($start) && strtotime($start) !== false) {
+        if (is_string($start) && strtotime($start) !== false) {
             $startDate = new DateTime($start);
         }
 
-        if ($end !== null && is_string($end) && strtotime($end) !== false) {
+        if (is_string($end) && strtotime($end) !== false) {
             $endDate = new DateTime($end);
         }
-
-        $shifts = $this->facade->shifts($startDate, $endDate);
-
-        return $this->json($shifts->toArray());
+        return [$startDate, $endDate];
     }
 }

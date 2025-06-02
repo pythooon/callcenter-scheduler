@@ -32,7 +32,8 @@ final class AgentList implements AgentListContract
     /**
      * @return list<array{
      *      id: string,
-     *      name: string
+     *      name: string,
+     *      queues: string
      *  }>
      */
     public function toArray(): array

@@ -36,14 +36,19 @@ class AgentEntityRepositoryImpl extends ServiceEntityRepository implements Agent
      * @param list<Uuid> $ids
      * @return list<Agent>
      */
-    public function findByIds(array $ids = []): array
+    public function findByQueueIds(array $ids = []): array
     {
-        $agents = $this->findByIds($ids);
+        $qb = $this->createQueryBuilder('a');
 
-        if (count($agents) !== count($ids)) {
-            throw new EntityNotFoundException('Some agents were not found.');
+        if (!empty($ids)) {
+            $qb->innerJoin('a.queues', 'q')
+                ->where('q.id IN (:ids)')
+                ->setParameter('ids', array_map(fn(Uuid $id) => $id->toBinary(), $ids));
         }
 
-        return $agents;
+        /** @var list<Agent> $results */
+        $results = $qb->getQuery()->getResult();
+
+        return $results;
     }
 }

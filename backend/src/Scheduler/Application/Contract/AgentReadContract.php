@@ -24,7 +24,8 @@ interface AgentReadContract extends Arrayable
     /**
      * @return array{
      *     id: string,
-     *     name: string
+     *     name: string,
+     *     queues: string
      * }
      */
     public function toArray(): array;

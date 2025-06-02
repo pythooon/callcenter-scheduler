@@ -15,5 +15,5 @@ interface AgentRepository
      * @param list<Uuid> $ids
      * @return AgentListContract
      */
-    public function findByIds(array $ids = []): AgentListContract;
+    public function findByQueueIds(array $ids = []): AgentListContract;
 }

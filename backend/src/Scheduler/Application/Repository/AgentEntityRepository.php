@@ -20,5 +20,5 @@ interface AgentEntityRepository
      * @param list<Uuid> $ids
      * @return list<Agent>
      */
-    public function findByIds(array $ids = []): array;
+    public function findByQueueIds(array $ids = []): array;
 }
