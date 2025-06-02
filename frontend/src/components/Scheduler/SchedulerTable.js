@@ -18,7 +18,7 @@ const StyledTableCell = styled(TableCell)(({ isHighlighted }: any) => ({
     textAlign: 'center',
     minWidth: '120px',
     border: '1px solid #ddd',
-    backgroundColor: isHighlighted ? '#c5e1a5' : 'transparent',
+    backgroundColor: isHighlighted ? '#c5e1a5' : '#f1f1f1',
     verticalAlign: 'top',
 }));
 
@@ -187,7 +187,7 @@ const SchedulerTable = () => {
                     <Table stickyHeader>
                         <TableHead>
                             <TableRow>
-                                <StyledTableCell />
+                                <StyledTableCell/>
                                 {weekDates.map(date => (
                                     <StyledTableCell key={date} isHighlighted={new Date(date).toDateString() === new Date().toDateString()}>
                                         {format(new Date(date), 'dd/MM E')}
