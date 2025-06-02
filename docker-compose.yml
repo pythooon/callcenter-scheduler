@@ -37,7 +37,9 @@ services:
       - ./backend/nginx/api-certs:/etc/nginx/api-certs
       - ./backend/nginx/frontend-certs:/etc/nginx/frontend-certs
       - ./backend/certbot/conf:/etc/letsencrypt
-      - ./backend/certbot/www:/var/www/certbot
+      - ./backend/certbot/www:/var/www/api/certbot
+      - ./frontend/certbot/conf:/etc/letsencrypt
+      - ./frontend/certbot/www:/var/www/app/certbot
     depends_on:
       - php
       - frontend
@@ -103,7 +105,9 @@ services:
     image: certbot/certbot
     volumes:
       - ./backend/certbot/conf:/etc/letsencrypt
-      - ./backend/certbot/www:/var/www/certbot
+      - ./backend/certbot/www:/var/www/api/certbot
+      - ./frontend/certbot/conf/*:/etc/letsencrypt/*
+      - ./frontend/certbot/www:/var/www/app/certbot
     depends_on:
       - nginx
     networks:
