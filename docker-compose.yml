@@ -38,6 +38,8 @@ services:
       - ./backend/nginx/frontend-certs:/etc/nginx/frontend-certs
       - ./backend/certbot/www:/var/www/api/certbot
       - ./frontend/certbot/www:/var/www/app/certbot
+      - ./backend/certbot/conf:/etc/letsencrypt/backend
+      - ./frontend/certbot/conf:/etc/letsencrypt/frontend
     depends_on:
       - php
       - frontend
