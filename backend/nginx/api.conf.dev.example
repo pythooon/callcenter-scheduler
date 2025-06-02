@@ -5,7 +5,7 @@ server {
     root /var/www/api/public;
     index index.php index.html;
 
-    set $cors_origin "https://call-center.pythdev.pl";
+    set $cors_origin "http://call-center.pythdev.pl";
 
     location / {
         if ($request_method = 'OPTIONS') {
