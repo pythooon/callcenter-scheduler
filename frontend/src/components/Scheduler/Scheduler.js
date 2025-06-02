@@ -60,7 +60,7 @@ const Scheduler = () => {
         };
 
         fetchDataForTab();
-    }, [selectedTab, data, tabData]);
+    }, [selectedTab]);
 
     const renderTabContent = () => {
         if (loading) {
