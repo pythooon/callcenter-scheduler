@@ -14,12 +14,13 @@ use App\Scheduler\Domain\Model\AgentRead;
 use App\Scheduler\Domain\Model\CallHistoryList;
 use App\Scheduler\Domain\Model\CallHistoryRead;
 use App\Scheduler\Domain\Model\EfficiencyList;
+use App\Scheduler\Domain\Model\EfficiencyRead;
 use App\Scheduler\Domain\Model\QueueList;
 use App\Scheduler\Domain\Model\QueueRead;
 use App\Scheduler\Domain\UseCase\CalculateEfficiency\CalculateEfficiency;
 use DateTime;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 
 class CalculateEfficiencyTest extends TestCase
@@ -27,6 +28,9 @@ class CalculateEfficiencyTest extends TestCase
     private AgentRepository $agentRepository;
     private CallHistoryRepository $callHistoryRepository;
     private EfficiencyRepository $efficiencyRepository;
+    private EfficiencyMapper $efficiencyMapper;
+    private EfficiencyCalculator $efficiencyCalculator;
+    private LoggerInterface $logger;
     private CalculateEfficiency $useCase;
 
     protected function setUp(): void
@@ -34,25 +38,27 @@ class CalculateEfficiencyTest extends TestCase
         $this->agentRepository = $this->createMock(AgentRepository::class);
         $this->callHistoryRepository = $this->createMock(CallHistoryRepository::class);
         $this->efficiencyRepository = $this->createMock(EfficiencyRepository::class);
+        $this->efficiencyMapper = new EfficiencyMapper();
+        $this->efficiencyCalculator = new EfficiencyCalculator();
+        $this->logger = $this->createMock(LoggerInterface::class);
 
         $this->useCase = new CalculateEfficiency(
             $this->agentRepository,
             $this->callHistoryRepository,
             $this->efficiencyRepository,
-            new EfficiencyMapper(),
-            new EfficiencyCalculator(),
-            new NullLogger()
+            $this->efficiencyMapper,
+            $this->efficiencyCalculator,
+            $this->logger
         );
     }
 
-    public function testRunReturnsEfficiencies(): void
+    public function testEfficiencyCalculationForAgents(): void
     {
-        $agentId = Uuid::v4();
-        $queue = new QueueRead(Uuid::v4(), 'Queue');
+        $queue = new QueueRead(Uuid::v4(), 'Support');
         $queueList = new QueueList();
         $queueList->addItem($queue);
 
-        $agent = new AgentRead($agentId, 'Agent Name', $queueList);
+        $agent = new AgentRead(Uuid::v4(), 'Test Agent', $queueList);
         $agentList = new AgentList();
         $agentList->addItem($agent);
 
@@ -60,46 +66,79 @@ class CalculateEfficiencyTest extends TestCase
             ->method('findAll')
             ->willReturn($agentList);
 
-        $callHistory = new CallHistoryRead(
+        $callHistoryList = new CallHistoryList();
+        $callHistoryList->addItem(new CallHistoryRead(
             Uuid::v4(),
             $agent,
             $queue,
-            new DateTime('2024-01-01 10:00:00'),
-            10
-        );
-        $callHistoryList = new CallHistoryList();
-        $callHistoryList->addItem($callHistory);
+            new \DateTimeImmutable('2025-05-30 14:00:00'),
+            15
+        ));
 
         $this->callHistoryRepository
-            ->method('findByAgentReadContract')
+            ->method('findByAgentAndQueues')
             ->willReturn($callHistoryList);
 
         $this->efficiencyRepository
             ->expects($this->once())
             ->method('upsert');
+
         $this->efficiencyRepository
             ->method('findAll')
             ->willReturnCallback(function () use ($agent, $queue) {
-                $list = new EfficiencyList();
-                $list->addItem((new EfficiencyCalculator())->calculate(
+                $eff = new EfficiencyRead(
+                    Uuid::v4(),
                     $agent,
-                    $this->callHistoryRepository->findByAgentReadContract($agent),
-                    new DateTime('2024-01-01 00:00:00'),
-                    new DateTime('2024-01-31 23:59:59')
-                )->getItems()[0]);
+                    $queue,
+                    7.8,
+                    new \DateTime('2024-01-01'),
+                    new \DateTime('2024-01-31')
+                );
+                $list = new EfficiencyList();
+                $list->addItem($eff);
                 return $list;
             });
 
-        $result = $this->useCase->run(
-            [],
-            new DateTime('2024-01-01 00:00:00'),
-            new DateTime('2024-01-31 23:59:59')
-        );
+        $result = $this->useCase->run();
 
         $this->assertCount(1, $result->getItems());
-        $efficiency = $result->getItems()[0];
-        $this->assertSame($agent, $efficiency->getAgent());
-        $this->assertSame($queue, $efficiency->getQueue());
-        $this->assertSame(10.0, $efficiency->getScore());
+        $this->assertSame(7.8, $result->getItems()[0]->getScore());
+        $this->assertSame($agent, $result->getItems()[0]->getAgent());
+    }
+
+    public function testHandlesEfficiencyCalculationExceptionForOneAgent(): void
+    {
+        $queue = new QueueRead(Uuid::v4(), 'Queue');
+        $queueList = new QueueList();
+        $queueList->addItem($queue);
+        $agent = new AgentRead(Uuid::v4(), 'Problem Agent', $queueList);
+
+        $agentList = new AgentList();
+        $agentList->addItem($agent);
+
+        $this->agentRepository
+            ->method('findAll')
+            ->willReturn($agentList);
+
+        // Symulacja wyjątku przy pobieraniu historii – to wejdzie w catch w useCase
+        $this->callHistoryRepository
+            ->method('findByAgentAndQueues')
+            ->willThrowException(new \RuntimeException('Failed'));
+
+        $this->logger
+            ->expects($this->once())
+            ->method('error')
+            ->with(
+                $this->stringContains('Failed to calculate efficiency for agent'),
+                $this->arrayHasKey('agentId')
+            );
+
+        $this->efficiencyRepository
+            ->method('findAll')
+            ->willReturn(new EfficiencyList());
+
+        $result = $this->useCase->run([]);
+
+        $this->assertCount(0, $result->getItems());
     }
 }

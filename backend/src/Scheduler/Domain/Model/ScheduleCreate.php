@@ -11,9 +11,9 @@ use Symfony\Component\Uid\Uuid;
 final readonly class ScheduleCreate implements ScheduleCreateContract
 {
     public function __construct(
-        private ?Uuid $queueId,
-        private ?DateTimeInterface $startDate,
-        private ?DateTimeInterface $endDate
+        private ?Uuid $queueId = null,
+        private ?DateTimeInterface $startDate = null,
+        private ?DateTimeInterface $endDate = null
     ) {
     }
 

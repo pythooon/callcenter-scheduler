@@ -70,7 +70,9 @@ class ShiftReadTest extends TestCase
         $this->assertArrayHasKey('end', $result);
 
         $this->assertEquals((string) $this->id, $result['id']);
-        $this->assertEquals($this->agent->toArray(), $result['agent']);
+        $agentArray = $this->agent->toArray();
+        unset($agentArray['queues']);
+        $this->assertEquals($agentArray, $result['agent']);
         $this->assertEquals($this->queue->toArray(), $result['queue']);
         $this->assertEquals($this->start->format('Y-m-d H:i:s'), $result['start']);
         $this->assertEquals($this->end->format('Y-m-d H:i:s'), $result['end']);

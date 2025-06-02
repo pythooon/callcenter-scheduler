@@ -62,8 +62,7 @@ class PredictionListTest extends TestCase
         $this->assertCount(1, $result);
         $this->assertArrayHasKey('id', $result[0]);
         $this->assertArrayHasKey('queue', $result[0]);
-        $this->assertArrayHasKey('date', $result[0]);
-        $this->assertArrayHasKey('time', $result[0]);
+        $this->assertArrayHasKey('dateTime', $result[0]);
         $this->assertArrayHasKey('occupancy', $result[0]);
     }
 }

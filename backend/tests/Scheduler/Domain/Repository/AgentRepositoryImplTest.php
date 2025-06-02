@@ -67,11 +67,11 @@ final class AgentRepositoryImplTest extends TestCase
 
         $this->entityRepositoryMock
             ->expects($this->once())
-            ->method('findByIds')
+            ->method('findByQueueIds')
             ->with([])
             ->willReturn($agentsArray);
 
-        $result = $this->repository->findByIds([]);
+        $result = $this->repository->findByQueueIds([]);
 
         $this->assertEquals($this->agentList, $result);
     }

@@ -7,6 +7,9 @@ namespace App\Tests\Scheduler\Domain\Repository;
 use App\Scheduler\Application\Contract\AgentReadContract;
 use App\Scheduler\Application\Repository\CallHistoryEntityRepository;
 use App\Scheduler\Domain\Mapper\CallHistoryMapper;
+use App\Scheduler\Domain\Model\AgentRead;
+use App\Scheduler\Domain\Model\QueueList;
+use App\Scheduler\Domain\Model\QueueRead;
 use App\Scheduler\Domain\Repository\CallHistoryRepositoryImpl;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
@@ -27,19 +30,21 @@ class CallHistoryRepositoryImplTest extends TestCase
     public function testFindByAgentReadContract(): void
     {
         $id = Uuid::v4();
-        $agentReadContract = $this->createMock(AgentReadContract::class);
-        $agentReadContract->method('getId')->willReturn($id);
+        $queueId = Uuid::v4();
+        $queueList = new QueueList();
+        $queueList->addItem(new QueueRead($queueId, 'Queue 1'));
+        $agentReadContract = new AgentRead($id, 'Agent 1', $queueList);;
 
         $callHistoryItems = [];
 
         $this->entityRepository
-            ->method('findByAgentId')
-            ->with($id)
+            ->method('findByAgentIdAndQueueIds')
+            ->with($id, [$queueId])
             ->willReturn($callHistoryItems);
 
         $callHistoryListContract = $this->mapper::mapArrayToListContract($callHistoryItems);
 
-        $result = $this->repository->findByAgentReadContract($agentReadContract);
+        $result = $this->repository->findByAgentAndQueues($agentReadContract, [$queueId]);
 
         $this->assertEquals($callHistoryListContract, $result);
     }

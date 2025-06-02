@@ -71,12 +71,10 @@ class PredictionReadTest extends TestCase
         $this->assertIsArray($result);
         $this->assertArrayHasKey('id', $result);
         $this->assertArrayHasKey('queue', $result);
-        $this->assertArrayHasKey('date', $result);
-        $this->assertArrayHasKey('time', $result);
+        $this->assertArrayHasKey('dateTime', $result);
         $this->assertArrayHasKey('occupancy', $result);
 
         $this->assertIsArray($result['queue']);
-        $this->assertEquals($this->date->format('Y-m-d'), $result['date']);
-        $this->assertEquals($this->time->format('H:i'), $result['time']);
+        $this->assertEquals($this->date->format('Y-m-d') .' '. $this->time->format('H:i'), $result['dateTime']);
     }
 }
