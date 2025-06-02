@@ -18,8 +18,8 @@ server {
     root /var/www/api/public;
     index index.php index.html;
 
-    ssl_certificate /etc/letsencrypt/live/api-call-center.pythdev.pl/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/api-call-center.pythdev.pl/privkey.pem;
+    ssl_certificate /etc/letsencrypt/backend/live/api-call-center.pythdev.pl/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/backend/live/api-call-center.pythdev.pl/privkey.pem;
 
     set $cors_origin "https://call-center.pythdev.pl";
 
